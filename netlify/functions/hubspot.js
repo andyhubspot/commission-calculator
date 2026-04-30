@@ -13,8 +13,8 @@ exports.handler = async (event) => {
     };
   }
 
-  // Read token from environment — fallback to hardcoded for testing
-  const token = process.env.HUBSPOT_TOKEN || 'pat-na2-8417274d-a303-4277-ac7d-e259a100ee8e';
+  // Token lives securely in Netlify environment variables only
+  const token = process.env.HUBSPOT_TOKEN;
 
   // Debug — remove after testing
   if (!token) {
