@@ -306,12 +306,12 @@
       </div>
       <div class="field-group">
         <label>Date Invoiced</label>
-        <input type="text" id="dateInvoiced" placeholder="MM/DD/YYYY" />
+        <input type="date" id="dateInvoiced" />
       </div>
     </div>
     <div class="field-group">
       <label>Date Commission Received</label>
-      <input type="text" id="dateReceived" placeholder="MM/DD/YYYY" />
+      <input type="date" id="dateReceived" />
     </div>
     <div class="field-group">
       <label>Commission Notes</label>
@@ -480,14 +480,29 @@
   function fmtPct(n){return n+'%';}
 
   function dateToTimestamp(str){
-    if(!str)return null;
-    const d=new Date(str);
-    return isNaN(d)?null:d.getTime();
+    if(!str) return null;
+    // Handle date input format YYYY-MM-DD
+    const parts = str.split('-');
+    if(parts.length === 3) {
+      // Use UTC midnight to avoid timezone shifting
+      const d = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])));
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    // Handle MM/DD/YYYY format as fallback
+    const slashParts = str.split('/');
+    if(slashParts.length === 3) {
+      const d = new Date(Date.UTC(parseInt(slashParts[2]), parseInt(slashParts[0])-1, parseInt(slashParts[1])));
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    return null;
   }
   function timestampToDate(ts){
-    if(!ts)return '';
-    const d=new Date(parseInt(ts));
-    return (d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+d.getFullYear();
+    if(!ts) return '';
+    const d = new Date(parseInt(ts));
+    // Return YYYY-MM-DD format for date input
+    return d.getUTCFullYear()+'-'+
+           (d.getUTCMonth()+1).toString().padStart(2,'0')+'-'+
+           d.getUTCDate().toString().padStart(2,'0');
   }
 
   function setSyncStatus(msg,type){
