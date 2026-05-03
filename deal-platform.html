@@ -6,7 +6,7 @@
 <title>Deal Intelligence Platform — Andy Moore | JLL</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
-
+ 
 :root {
   --ink: #0c0c0e;
   --paper: #f4f1eb;
@@ -22,9 +22,9 @@
   --display: 'Syne', sans-serif;
   --body: 'Inter', sans-serif;
 }
-
+ 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
 body {
   font-family: var(--body);
   background: var(--paper);
@@ -32,7 +32,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
+ 
 /* ── HEADER ── */
 .header {
   background: var(--ink);
@@ -46,13 +46,13 @@ body {
   top: 0;
   z-index: 100;
 }
-
+ 
 .header-brand {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-
+ 
 .header-logo {
   font-family: var(--display);
   font-size: 13px;
@@ -61,11 +61,11 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-
+ 
 .header-logo span {
   color: var(--accent);
 }
-
+ 
 .header-sub {
   font-family: var(--mono);
   font-size: 10px;
@@ -75,13 +75,13 @@ body {
   border-left: 1px solid #333;
   padding-left: 16px;
 }
-
+ 
 .deal-badge {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
+ 
 .deal-id-input {
   font-family: var(--mono);
   font-size: 12px;
@@ -94,10 +94,10 @@ body {
   width: 160px;
   transition: border-color 0.15s;
 }
-
+ 
 .deal-id-input:focus { border-color: var(--accent); }
 .deal-id-input::placeholder { color: #555; }
-
+ 
 .load-btn {
   font-family: var(--mono);
   font-size: 11px;
@@ -111,9 +111,9 @@ body {
   text-transform: uppercase;
   transition: background 0.15s;
 }
-
+ 
 .load-btn:hover { background: #a33215; }
-
+ 
 .deal-name-tag {
   font-family: var(--mono);
   font-size: 11px;
@@ -124,7 +124,7 @@ body {
   white-space: nowrap;
   display: none;
 }
-
+ 
 /* ── NAV TABS ── */
 .nav {
   background: var(--surface);
@@ -134,7 +134,7 @@ body {
   gap: 0;
   overflow-x: auto;
 }
-
+ 
 .nav-tab {
   font-family: var(--display);
   font-size: 12px;
@@ -152,21 +152,21 @@ body {
   align-items: center;
   gap: 6px;
 }
-
+ 
 .nav-tab:hover { color: var(--ink); }
 .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .nav-tab .tab-icon { font-size: 14px; }
-
+ 
 /* ── MAIN CONTENT ── */
 .main {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
 }
-
+ 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-
+ 
 /* ── DEAL OVERVIEW ── */
 .overview-grid {
   display: grid;
@@ -174,21 +174,21 @@ body {
   gap: 16px;
   margin-bottom: 2rem;
 }
-
+ 
 .overview-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1.25rem;
 }
-
+ 
 .overview-card.primary {
   background: var(--ink);
   color: #fff;
   border-color: var(--ink);
   grid-column: span 1;
 }
-
+ 
 .oc-label {
   font-family: var(--mono);
   font-size: 10px;
@@ -197,9 +197,9 @@ body {
   color: var(--muted);
   margin-bottom: 6px;
 }
-
+ 
 .overview-card.primary .oc-label { color: #666; }
-
+ 
 .oc-value {
   font-family: var(--display);
   font-size: 1.4rem;
@@ -207,16 +207,16 @@ body {
   letter-spacing: -0.02em;
   color: var(--ink);
 }
-
+ 
 .overview-card.primary .oc-value { color: #fff; }
-
+ 
 .oc-sub {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--muted);
   margin-top: 4px;
 }
-
+ 
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
@@ -224,11 +224,11 @@ body {
   border-radius: 12px;
   background: var(--surface);
 }
-
+ 
 .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
 .empty-title { font-family: var(--display); font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
 .empty-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
-
+ 
 /* ── FORMS ── */
 .section-title {
   font-family: var(--mono);
@@ -243,7 +243,7 @@ body {
   align-items: center;
   justify-content: space-between;
 }
-
+ 
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -251,15 +251,15 @@ body {
   padding: 1.5rem;
   margin-bottom: 1rem;
 }
-
+ 
 .field-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
 }
-
+ 
 .field-group { display: flex; flex-direction: column; gap: 5px; }
-
+ 
 label {
   font-size: 11px;
   font-weight: 500;
@@ -267,7 +267,7 @@ label {
   text-transform: uppercase;
   color: var(--muted);
 }
-
+ 
 input[type=text], input[type=number], input[type=date], select, textarea {
   width: 100%;
   padding: 8px 10px;
@@ -282,7 +282,7 @@ input[type=text], input[type=number], input[type=date], select, textarea {
   appearance: none;
   -webkit-appearance: none;
 }
-
+ 
 select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -290,10 +290,10 @@ select {
   padding-right: 28px;
   cursor: pointer;
 }
-
+ 
 textarea { resize: vertical; min-height: 80px; }
 input:focus, select:focus, textarea:focus { border-color: var(--accent2); background: #fff; }
-
+ 
 /* ── BUTTONS ── */
 .btn {
   font-family: var(--display);
@@ -307,7 +307,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   text-transform: uppercase;
   transition: all 0.15s;
 }
-
+ 
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: #a33215; }
 .btn-secondary { background: var(--ink); color: #fff; }
@@ -317,7 +317,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
 .btn-success { background: var(--success); color: #fff; }
 .btn-gold { background: var(--gold); color: #fff; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
+ 
 .btn-row {
   display: flex;
   gap: 10px;
@@ -325,7 +325,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   flex-wrap: wrap;
   margin-top: 1.25rem;
 }
-
+ 
 /* ── STATUS PILLS ── */
 .pill {
   font-family: var(--mono);
@@ -334,13 +334,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   border-radius: 99px;
   display: inline-block;
 }
-
+ 
 .pill-ok { background: #e8f4e8; color: var(--success); }
 .pill-err { background: #fef3ee; color: var(--accent); }
 .pill-working { background: #faf5e0; color: #7a6020; }
 .pill-info { background: #e8eef8; color: var(--accent2); }
 .pill-neutral { background: var(--surface2); color: var(--muted); }
-
+ 
 /* ── FILE UPLOAD ── */
 .upload-zone {
   border: 2px dashed var(--border);
@@ -352,12 +352,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   background: var(--surface2);
   position: relative;
 }
-
+ 
 .upload-zone:hover, .upload-zone.drag-over {
   border-color: var(--accent2);
   background: #f0f5ff;
 }
-
+ 
 .upload-zone input[type=file] {
   position: absolute;
   inset: 0;
@@ -366,11 +366,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   width: 100%;
   height: 100%;
 }
-
+ 
 .upload-icon { font-size: 2rem; margin-bottom: 8px; }
 .upload-title { font-family: var(--display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
 .upload-sub { font-size: 12px; color: var(--muted); }
-
+ 
 .multi-upload-list { list-style: none; margin-top: 1rem; }
 .mul-item {
   display: flex;
@@ -383,22 +383,22 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   margin-bottom: 6px;
   font-size: 12px;
 }
-
+ 
 .mul-name { flex: 1; font-weight: 500; }
 .mul-status { font-family: var(--mono); font-size: 10px; }
 .mul-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 0 4px; }
 .mul-remove:hover { color: var(--accent); }
-
+ 
 /* ── COMPARISON TABLE ── */
 .comp-wrap { overflow-x: auto; margin-top: 1rem; }
-
+ 
 .comp-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
   min-width: 600px;
 }
-
+ 
 .comp-table th {
   font-family: var(--display);
   font-size: 11px;
@@ -411,19 +411,19 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   text-align: left;
   white-space: nowrap;
 }
-
+ 
 .comp-table th:first-child { background: #1a1a1a; }
-
+ 
 .comp-table td {
   padding: 9px 12px;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
   line-height: 1.4;
 }
-
+ 
 .comp-table tr:last-child td { border-bottom: none; }
 .comp-table tr:nth-child(even) td { background: var(--surface2); }
-
+ 
 .comp-table td:first-child {
   font-weight: 600;
   color: var(--muted);
@@ -432,12 +432,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   background: #f9f7f3 !important;
   border-right: 2px solid var(--border);
 }
-
+ 
 .cell-best { background: #e8f4e8 !important; color: var(--success); font-weight: 600; }
 .cell-worst { background: #fef3ee !important; color: var(--accent); }
 .cell-mid { background: #faf5e0 !important; color: #7a6020; }
 .cell-same { color: var(--muted); font-style: italic; }
-
+ 
 /* ── SCORECARD ── */
 .scorecard-grid {
   display: grid;
@@ -445,7 +445,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   gap: 12px;
   margin-top: 1rem;
 }
-
+ 
 .score-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -455,12 +455,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   position: relative;
   overflow: hidden;
 }
-
+ 
 .score-card.winner {
   border-color: var(--success);
   background: linear-gradient(135deg, #f0fff4 0%, #fff 100%);
 }
-
+ 
 .score-card.winner::before {
   content: '★ BEST';
   position: absolute;
@@ -475,7 +475,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   transform: rotate(45deg);
   transform-origin: center;
 }
-
+ 
 .score-name { font-family: var(--display); font-size: 13px; font-weight: 700; margin-bottom: 4px; }
 .score-address { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
 .score-num { font-family: var(--mono); font-size: 2.5rem; font-weight: 500; color: var(--accent2); }
@@ -483,7 +483,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
 .score-bar-wrap { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 10px; }
 .score-bar { height: 100%; border-radius: 99px; background: var(--accent2); transition: width 0.6s ease; }
 .score-card.winner .score-bar { background: var(--success); }
-
+ 
 /* ── REDLINES ── */
 .redline-block {
   border: 1px solid var(--border);
@@ -491,7 +491,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   overflow: hidden;
   margin-bottom: 12px;
 }
-
+ 
 .redline-header {
   background: var(--ink);
   color: #fff;
@@ -500,15 +500,15 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   align-items: center;
   justify-content: space-between;
 }
-
+ 
 .redline-title { font-family: var(--display); font-size: 13px; font-weight: 700; }
 .redline-priority { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; }
 .priority-high { color: #ff7070; }
 .priority-med { color: #ffd070; }
 .priority-low { color: #70ff70; }
-
+ 
 .redline-body { padding: 12px 16px; background: var(--surface); }
-
+ 
 .redline-item {
   display: flex;
   gap: 12px;
@@ -517,9 +517,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   font-size: 12px;
   line-height: 1.5;
 }
-
+ 
 .redline-item:last-child { border-bottom: none; }
-
+ 
 .redline-term {
   font-weight: 600;
   min-width: 120px;
@@ -528,10 +528,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   font-size: 11px;
   padding-top: 1px;
 }
-
+ 
 .redline-rec { flex: 1; color: var(--ink); }
 .redline-impact { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
-
+ 
 /* ── PRIORITY SLIDER ── */
 .priority-grid {
   display: grid;
@@ -539,7 +539,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   gap: 12px;
   margin: 1rem 0;
 }
-
+ 
 .priority-item {
   display: flex;
   align-items: center;
@@ -549,7 +549,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   border-radius: 6px;
   padding: 10px 14px;
 }
-
+ 
 .priority-label { flex: 1; font-size: 12px; font-weight: 500; }
 .priority-weight {
   font-family: var(--mono);
@@ -558,13 +558,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent2); backgr
   min-width: 30px;
   text-align: right;
 }
-
+ 
 input[type=range] {
   width: 80px;
   accent-color: var(--accent2);
   cursor: pointer;
 }
-
+ 
 /* ── PROGRESS ── */
 .progress-wrap {
   background: var(--border);
@@ -573,7 +573,7 @@ input[type=range] {
   overflow: hidden;
   margin: 8px 0;
 }
-
+ 
 .progress-bar {
   height: 100%;
   background: var(--accent);
@@ -581,7 +581,7 @@ input[type=range] {
   transition: width 0.3s;
   width: 0%;
 }
-
+ 
 /* ── RECOMMENDATION ── */
 .rec-memo {
   background: var(--surface);
@@ -591,7 +591,7 @@ input[type=range] {
   line-height: 1.7;
   font-size: 13px;
 }
-
+ 
 .rec-memo h2 {
   font-family: var(--display);
   font-size: 18px;
@@ -600,7 +600,7 @@ input[type=range] {
   padding-bottom: 0.75rem;
   border-bottom: 2px solid var(--ink);
 }
-
+ 
 .rec-memo h3 {
   font-family: var(--display);
   font-size: 14px;
@@ -608,9 +608,9 @@ input[type=range] {
   margin: 1.25rem 0 0.5rem;
   color: var(--accent);
 }
-
+ 
 .rec-memo p { margin-bottom: 0.75rem; }
-
+ 
 .rec-memo .highlight {
   background: #faf5e0;
   border-left: 3px solid var(--gold);
@@ -618,7 +618,7 @@ input[type=range] {
   margin: 1rem 0;
   font-style: italic;
 }
-
+ 
 /* ── COMMISSION CALCULATOR (embedded) ── */
 .calc-embed {
   background: var(--surface);
@@ -626,7 +626,7 @@ input[type=range] {
   border-radius: 8px;
   overflow: hidden;
 }
-
+ 
 .calc-header {
   background: var(--ink);
   color: #fff;
@@ -635,24 +635,24 @@ input[type=range] {
   align-items: center;
   justify-content: space-between;
 }
-
+ 
 .calc-header-title { font-family: var(--display); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
 .calc-header-sub { font-family: var(--mono); font-size: 10px; color: #888; }
-
+ 
 .calc-body { display: grid; grid-template-columns: 1fr 1fr; }
 .calc-left { padding: 1.5rem; border-right: 1px solid var(--border); }
 .calc-right { padding: 1.5rem; background: var(--surface2); }
-
+ 
 .result-big {
   background: var(--ink);
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 1rem;
 }
-
+ 
 .result-big-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-bottom: 4px; }
 .result-big-value { font-family: var(--mono); font-size: 2.2rem; font-weight: 500; color: var(--accent); letter-spacing: -0.02em; }
-
+ 
 .result-row {
   display: flex;
   justify-content: space-between;
@@ -661,11 +661,11 @@ input[type=range] {
   border-bottom: 1px solid var(--border);
   font-size: 12px;
 }
-
+ 
 .result-row:last-child { border-bottom: none; }
 .result-row-label { color: var(--muted); }
 .result-row-value { font-family: var(--mono); font-weight: 500; }
-
+ 
 .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 .tog-btn {
   font-size: 11px;
@@ -680,20 +680,20 @@ input[type=range] {
 }
 .tog-btn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 .tog-btn:hover:not(.on) { border-color: var(--ink); color: var(--ink); }
-
+ 
 .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
-
+ 
 .input-pfx { position: relative; }
 .input-pfx span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 12px; color: var(--muted); pointer-events: none; }
 .input-pfx input { padding-left: 22px; }
 .input-sfx { position: relative; }
 .input-sfx span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 12px; color: var(--muted); pointer-events: none; }
 .input-sfx input { padding-right: 28px; }
-
+ 
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-grp { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
 .field-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
-
+ 
 .save-btn-full {
   width: 100%;
   padding: 12px;
@@ -710,17 +710,17 @@ input[type=range] {
   margin-top: 1rem;
   transition: background 0.15s;
 }
-
+ 
 .save-btn-full:hover { background: #a33215; }
 .save-btn-full:disabled { background: #ccc; cursor: not-allowed; }
-
+ 
 .save-status { margin-top: 8px; padding: 8px 12px; border-radius: 5px; font-family: var(--mono); font-size: 11px; display: none; line-height: 1.5; }
 .save-status.ok { background: #e8f4e8; color: var(--success); display: block; }
 .save-status.err { background: #fef3ee; color: var(--accent); display: block; }
 .save-status.working { background: #faf5e0; color: #7a6020; display: block; }
-
+ 
 .warn-box { background: #fff8f0; border: 1px solid #f0d0a0; border-radius: 5px; padding: 8px 12px; font-size: 11px; color: #7a5c2e; margin-top: 8px; display: none; line-height: 1.5; }
-
+ 
 /* ── ABSTRACTOR ── */
 .abstracted-fields {
   display: grid;
@@ -728,18 +728,18 @@ input[type=range] {
   gap: 10px;
   margin-top: 1rem;
 }
-
+ 
 .af-item {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px 12px;
 }
-
+ 
 .af-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
 .af-value { font-size: 13px; font-weight: 500; color: var(--ink); }
 .af-value.empty { color: var(--muted); font-style: italic; font-size: 12px; }
-
+ 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .main { padding: 1rem; }
@@ -750,7 +750,7 @@ input[type=range] {
 </style>
 </head>
 <body>
-
+ 
 <!-- HEADER -->
 <div class="header">
   <div class="header-brand">
@@ -763,7 +763,7 @@ input[type=range] {
     <div class="deal-name-tag" id="globalDealName"></div>
   </div>
 </div>
-
+ 
 <!-- NAV -->
 <div class="nav">
   <div class="nav-tab active" onclick="showTab('overview',this)"><span class="tab-icon">◈</span> Deal Overview</div>
@@ -772,10 +772,10 @@ input[type=range] {
   <div class="nav-tab" onclick="showTab('comparator',this)"><span class="tab-icon">⊞</span> Proposal Comparator</div>
   <div class="nav-tab" onclick="showTab('advisor',this)"><span class="tab-icon">◉</span> AI Deal Advisor</div>
 </div>
-
+ 
 <!-- MAIN -->
 <div class="main">
-
+ 
   <!-- ── TAB 1: OVERVIEW ── -->
   <div id="tab-overview" class="tab-content active">
     <div id="overview-empty" class="empty-state">
@@ -791,7 +791,7 @@ input[type=range] {
       </div>
     </div>
   </div>
-
+ 
   <!-- ── TAB 2: COMMISSION CALCULATOR ── -->
   <div id="tab-calculator" class="tab-content">
     <div class="calc-embed">
@@ -841,10 +841,10 @@ input[type=range] {
               <div class="field-grp"><div class="field-lbl">Broker Company</div><input type="text" id="refBrokerCompany" placeholder="Company"/></div>
             </div>
           </div>
-
+ 
           <div class="divider"></div>
           <div class="section-title">Economics</div>
-
+ 
           <div id="leaseCalcFields">
             <div class="field-grp">
               <div class="field-lbl">Lease Type</div>
@@ -872,18 +872,18 @@ input[type=range] {
             </div>
             <div class="field-grp"><div class="field-lbl">Free Rent (months)</div><input type="number" id="freeRent" placeholder="0" oninput="calcCommission()"/></div>
           </div>
-
+ 
           <div id="saleCalcFields" style="display:none">
             <div class="field-grp"><div class="field-lbl">Sale Price</div><div class="input-pfx"><span>$</span><input type="number" id="salePrice" placeholder="3800000" oninput="calcCommission()"/></div></div>
           </div>
-
+ 
           <div class="divider"></div>
           <div class="section-title">Override (optional)</div>
           <div class="two-col">
             <div class="field-grp"><div class="field-lbl">Commission Rate %</div><div class="input-sfx"><input type="number" id="commRate" step="0.25" placeholder="auto" oninput="calcCommission()"/><span>%</span></div></div>
             <div class="field-grp"><div class="field-lbl">JLL Split %</div><div class="input-sfx"><input type="number" id="jllSplit" value="50" step="5" oninput="calcCommission()"/><span>%</span></div></div>
           </div>
-
+ 
           <div class="divider"></div>
           <div class="section-title">Commission Status</div>
           <div class="two-col">
@@ -901,7 +901,7 @@ input[type=range] {
           <div class="field-grp"><div class="field-lbl">Date Commission Received</div><input type="date" id="dateReceived"/></div>
           <div class="field-grp"><div class="field-lbl">Commission Notes</div><textarea id="commissionNotes" placeholder="Any notes..."></textarea></div>
         </div>
-
+ 
         <div class="calc-right">
           <div class="result-big">
             <div class="result-big-label">Your Net Commission</div>
@@ -915,9 +915,9 @@ input[type=range] {
           <div class="result-row"><span class="result-row-label">Adjusted Gross</span><span class="result-row-value" id="rAdjusted">—</span></div>
           <div class="result-row"><span class="result-row-label" id="rJllLbl">JLL Split (50%)</span><span class="result-row-value" id="rJll">—</span></div>
           <div class="result-row" style="font-weight:700;border-top:2px solid var(--ink);margin-top:4px;padding-top:10px"><span>Your Net Commission</span><span class="result-row-value" id="rNet">—</span></div>
-
+ 
           <div class="warn-box" id="warnBox"></div>
-
+ 
           <div class="divider"></div>
           <div class="section-title">Lease Details</div>
           <div id="leaseResultDetails">
@@ -931,14 +931,14 @@ input[type=range] {
           <div id="saleResultDetails" style="display:none">
             <div class="result-row"><span class="result-row-label">Sale Price</span><span class="result-row-value" id="rSalePrice">—</span></div>
           </div>
-
+ 
           <button class="save-btn-full" id="saveCommBtn" onclick="saveCommission()" disabled>⬆ Save to HubSpot Deal</button>
           <div class="save-status" id="saveCommStatus"></div>
         </div>
       </div>
     </div>
   </div>
-
+ 
   <!-- ── TAB 3: ABSTRACTOR ── -->
   <div id="tab-abstractor" class="tab-content">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
@@ -952,7 +952,7 @@ input[type=range] {
             <div class="upload-sub">PDF, DOC, DOCX — executed lease, LOI, or PSA</div>
           </div>
           <div id="abstractFileStatus" style="margin-top:10px;display:none"></div>
-
+ 
           <div style="margin-top:1rem">
             <div class="field-grp">
               <div class="field-lbl">Document Type</div>
@@ -970,7 +970,7 @@ input[type=range] {
               <textarea id="abstractContext" placeholder="Any context to help with extraction — e.g. 'This is a NNN lease, tenant is responsible for all operating expenses'..." style="min-height:80px"></textarea>
             </div>
           </div>
-
+ 
           <div class="btn-row">
             <button class="btn btn-primary" id="abstractBtn" onclick="runAbstraction()" disabled>◇ Extract Details</button>
             <span id="abstractStatus" class="pill pill-neutral" style="display:none">Ready</span>
@@ -980,7 +980,7 @@ input[type=range] {
           </div>
         </div>
       </div>
-
+ 
       <div>
         <div class="card">
           <div class="section-title">Extracted Details <span id="abstractCount" style="color:var(--muted)"></span></div>
@@ -1000,10 +1000,10 @@ input[type=range] {
       </div>
     </div>
   </div>
-
+ 
   <!-- ── TAB 4: COMPARATOR ── -->
   <div id="tab-comparator" class="tab-content">
-
+ 
     <div class="card" id="compSetupCard">
       <div class="section-title">Client Priorities — Set weights for what matters most to your client</div>
       <div class="priority-grid" id="priorityGrid">
@@ -1014,19 +1014,19 @@ input[type=range] {
         <div class="priority-item"><span class="priority-label">Best building specs</span><input type="range" id="p_specs" min="0" max="10" value="6" oninput="updatePriorityWeight('p_specs',this.value)"/><span class="priority-weight" id="pw_specs">6</span></div>
         <div class="priority-item"><span class="priority-label">Shortest / longest term preference</span><input type="range" id="p_term" min="0" max="10" value="4" oninput="updatePriorityWeight('p_term',this.value)"/><span class="priority-weight" id="pw_term">4</span></div>
       </div>
-
+ 
       <div class="divider"></div>
       <div class="section-title">Upload Proposals (2–6 documents)</div>
-
+ 
       <div class="upload-zone" id="compUploadZone" style="margin-bottom:1rem">
         <input type="file" accept=".pdf,.doc,.docx" id="compFiles" multiple onchange="handleCompFiles(event)"/>
         <div class="upload-icon">⊞</div>
         <div class="upload-title">Drop RFPs or LOIs here</div>
         <div class="upload-sub">Upload multiple files at once — one per building/landlord</div>
       </div>
-
+ 
       <ul class="multi-upload-list" id="compFileList"></ul>
-
+ 
       <div class="field-grp" style="margin-top:1rem">
         <div class="field-lbl">Client Name / Company</div>
         <input type="text" id="compClientName" placeholder="e.g. VWR International / Avantor"/>
@@ -1045,7 +1045,7 @@ input[type=range] {
         <div class="field-lbl">Additional Client Requirements</div>
         <textarea id="compRequirements" placeholder="e.g. Must have 24 dock doors minimum, needs ICD-705 SCIF capability, client prefers 5-year term with renewal options, budget is $16 PSF max NNN..."></textarea>
       </div>
-
+ 
       <div class="btn-row">
         <button class="btn btn-primary" id="compRunBtn" onclick="runComparison()" disabled>⊞ Run Comparison & Analysis</button>
         <span id="compStatus" class="pill pill-neutral" style="display:none"></span>
@@ -1054,10 +1054,10 @@ input[type=range] {
         <div class="progress-bar" id="compProgressBar" style="width:0%"></div>
       </div>
     </div>
-
+ 
     <!-- RESULTS -->
     <div id="compResults" style="display:none">
-
+ 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div style="font-family:var(--display);font-size:18px;font-weight:800">Analysis Results</div>
         <div style="display:flex;gap:8px">
@@ -1065,13 +1065,13 @@ input[type=range] {
           <button class="btn btn-outline" onclick="resetComparison()">↺ New Comparison</button>
         </div>
       </div>
-
+ 
       <!-- Scorecard -->
       <div class="card">
         <div class="section-title">Overall Scorecard — weighted by your client's priorities</div>
         <div class="scorecard-grid" id="scorecardGrid"></div>
       </div>
-
+ 
       <!-- Comparison Table -->
       <div class="card">
         <div class="section-title">Side by Side Comparison
@@ -1082,22 +1082,22 @@ input[type=range] {
         </div>
         <div class="comp-wrap" id="compTableWrap"></div>
       </div>
-
+ 
       <!-- Redlines -->
       <div class="card">
         <div class="section-title">Redline Recommendations — by building</div>
         <div id="redlineBlocks"></div>
       </div>
-
+ 
       <!-- Recommendation Memo -->
       <div class="card">
         <div class="section-title">AI Recommendation Memo — client-ready</div>
         <div class="rec-memo" id="recMemo"></div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- ── TAB 5: AI ADVISOR ── -->
   <div id="tab-advisor" class="tab-content">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
@@ -1129,7 +1129,7 @@ input[type=range] {
           <div class="progress-bar" id="advisorProgressBar" style="width:60%;animation:pulse 1.5s infinite"></div>
         </div>
       </div>
-
+ 
       <div class="card">
         <div class="section-title">Recommendations</div>
         <div id="advisorOutput">
@@ -1142,17 +1142,17 @@ input[type=range] {
       </div>
     </div>
   </div>
-
+ 
 </div><!-- /main -->
-
+ 
 <style>
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 </style>
-
+ 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-var HS_BASE = '/.netlify/functions/hubspot';
-var AI_BASE = '/.netlify/functions/ai';
+var HS_BASE = 'https://acmcommission-calculator.netlify.app/.netlify/functions/hubspot';
+var AI_BASE = 'https://acmcommission-calculator.netlify.app/.netlify/functions/ai';
 var currentDealId = null;
 var currentDealData = null;
 var currentReferral = 'none';
@@ -1165,7 +1165,7 @@ var compFiles = [];
 var abstractedData = null;
 var comparisonData = null;
 var compViewMode = 'all';
-
+ 
 var DEAL_TYPE_MAP = {
   tenant_new:'Tenant Rep — New Lease', ll_new:'Landlord Rep — New Lease',
   tenant_renewal:'Tenant Rep — Renewal', ll_renewal:'Landlord Rep — Renewal',
@@ -1177,7 +1177,7 @@ var DEFAULT_RATES = {
   tenant_new:4, ll_new:2, tenant_renewal:3, ll_renewal:3,
   seller:3, buyer:3, dual_lease:4, dual_sale:4
 };
-
+ 
 var PROPS = {
   dealType:'dealtype', transactionValue:'transaction_value',
   commissionRate:'commission_rate', grossCommission:'gross_commission',
@@ -1188,7 +1188,7 @@ var PROPS = {
   dateInvoiced:'date_invoiced', dateReceived:'date_commission_received',
   commissionNotes:'commission_notes'
 };
-
+ 
 // ── UTILITIES ─────────────────────────────────────────────────────────────────
 function fmt(n){ if(isNaN(n)||n===null)return'—'; return'$'+Math.round(n).toLocaleString('en-US'); }
 function fmtPct(n){ return n+'%'; }
@@ -1201,7 +1201,7 @@ function showTab(name,tabEl){
   el('tab-'+name).classList.add('active');
   tabEl.classList.add('active');
 }
-
+ 
 // ── HUBSPOT API ───────────────────────────────────────────────────────────────
 async function hsGet(dealId, props){
   var url = HS_BASE+'?dealId='+dealId+'&properties='+props;
@@ -1213,44 +1213,44 @@ async function hsPatch(dealId, body){
   var r = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   return r;
 }
-
+ 
 // ── GLOBAL DEAL LOAD ──────────────────────────────────────────────────────────
 async function loadGlobalDeal(){
   var dealId = el('globalDealId').value.trim();
   if(!dealId){ alert('Enter a Deal ID'); return; }
   currentDealId = dealId;
-
+ 
   var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id';
   try{
     var r = await hsGet(dealId, propsToFetch);
     if(!r.ok){ alert('Deal not found — check the ID'); return; }
     var data = await r.json();
     currentDealData = data.properties;
-
+ 
     var name = currentDealData.dealname || 'Deal '+dealId;
     el('globalDealName').textContent = '📋 '+name;
     el('globalDealName').style.display = 'block';
-
+ 
     populateOverview(currentDealData, name, dealId);
     populateCalculatorFromDeal(currentDealData);
     el('saveCommBtn').disabled = false;
     el('calcDealTag').textContent = name;
-
+ 
   }catch(e){ alert('Connection error — check internet'); }
 }
-
+ 
 function populateOverview(p, name, dealId){
   el('overview-empty').style.display = 'none';
   el('overview-loaded').style.display = 'block';
-
+ 
   var amount = p.amount ? fmt(parseFloat(p.amount)) : '—';
   var stage = p.dealstage || '—';
-
+ 
   el('overviewGrid').innerHTML =
     '<div class="overview-card primary"><div class="oc-label">Deal</div><div class="oc-value" style="font-size:1.1rem">'+name+'</div><div class="oc-sub">ID: '+dealId+'</div></div>'+
     '<div class="overview-card"><div class="oc-label">Net Commission</div><div class="oc-value">'+amount+'</div><div class="oc-sub">Deal Amount (your net)</div></div>'+
     '<div class="overview-card"><div class="oc-label">Deal Type</div><div class="oc-value" style="font-size:1rem">'+(p.dealtype||'—')+'</div><div class="oc-sub">Pipeline type</div></div>';
-
+ 
   var fields = [
     ['Commission Status', p.commission_status||'—'],
     ['Gross Commission', p.gross_commission ? fmt(parseFloat(p.gross_commission)) : '—'],
@@ -1263,12 +1263,12 @@ function populateOverview(p, name, dealId){
     ['Date Invoiced', p.date_invoiced ? tsToDate(p.date_invoiced) : '—'],
     ['Date Received', p.date_commission_received ? tsToDate(p.date_commission_received) : '—'],
   ];
-
+ 
   el('overviewDetails').innerHTML = fields.map(([lbl,val])=>
     '<div class="field-group"><label>'+lbl+'</label><div style="font-size:13px;padding:6px 0;font-weight:500">'+val+'</div></div>'
   ).join('');
 }
-
+ 
 function populateCalculatorFromDeal(p){
   if(p.dealtype){ var cv=DEAL_TYPE_REVERSE[p.dealtype]; if(cv){el('dealType').value=cv; onDealTypeChange();} }
   if(p.commission_rate) el('commRate').value=p.commission_rate;
@@ -1281,7 +1281,7 @@ function populateCalculatorFromDeal(p){
   if(p.referring_broker_company) el('refBrokerCompany').value=p.referring_broker_company;
   calcCommission();
 }
-
+ 
 // ── COMMISSION CALCULATOR ─────────────────────────────────────────────────────
 function onDealTypeChange(){
   var t = el('dealType').value;
@@ -1293,7 +1293,7 @@ function onDealTypeChange(){
   el('commRate').placeholder = DEFAULT_RATES[t];
   calcCommission();
 }
-
+ 
 function setReferral(type, btn){
   currentReferral = type;
   btn.closest('.toggle-group').querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
@@ -1303,33 +1303,33 @@ function setReferral(type, btn){
   el('referralBrokerFields').style.display = type!=='none'?'block':'none';
   calcCommission();
 }
-
+ 
 function setLeaseType(type, btn){
   btn.closest('.toggle-group').querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   calcCommission();
 }
-
+ 
 function setTerm(months, btn){
   btn.closest('.toggle-group').querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   if(months!==null) el('termMonths').value=months;
   calcCommission();
 }
-
+ 
 function updatePriorityWeight(id, val){
   el('pw_'+id.replace('p_','')).textContent = val;
 }
-
+ 
 function calcCommission(){
   var t = el('dealType').value;
   var jll = parseFloat(el('jllSplit').value)||50;
   var rateInput = parseFloat(el('commRate').value);
   var rate = isNaN(rateInput)?DEFAULT_RATES[t]:rateInput;
   var isSale = ['seller','buyer','dual_sale'].includes(t);
-
+ 
   var transValue=0, gross=0;
-
+ 
   if(isSale){
     var sp = parseFloat(el('salePrice').value)||0;
     transValue = sp; gross = transValue*(rate/100);
@@ -1350,7 +1350,7 @@ function calcCommission(){
     el('rFreeRent').textContent = free?free+' months':'None';
     el('rTotal').textContent = fmt(transValue);
   }
-
+ 
   var adjusted=gross, inboundDed=0, refDed=0;
   if(currentReferral==='inbound'){
     var pct=parseFloat(el('inboundSplit').value)||50;
@@ -1367,7 +1367,7 @@ function calcCommission(){
   } else {
     el('rInboundRow').style.display='none'; el('rReferralRow').style.display='none';
   }
-
+ 
   var net = adjusted*((100-jll)/100);
   el('yourNet').textContent = fmt(net);
   el('rTransValue').textContent = fmt(transValue);
@@ -1377,27 +1377,27 @@ function calcCommission(){
   el('rJllLbl').textContent = 'JLL Split ('+jll+'%)';
   el('rJll').textContent = '('+fmt(adjusted*(jll/100))+')';
   el('rNet').textContent = fmt(net);
-
+ 
   var warn = el('warnBox');
   if(t==='ll_new'&&rate>2){warn.style.display='block';warn.textContent='Note: Standard LL Rep rate for new lease is 2% when tenant rep is involved.';}
   else if(t==='dual_lease'||t==='dual_sale'){warn.style.display='block';warn.textContent='Dual representation — confirm disclosure requirements with JLL compliance.';}
   else warn.style.display='none';
-
+ 
   currentGross=gross; currentTransValue=transValue; currentYourNet=net; currentAdjustedGross=adjusted;
 }
-
+ 
 async function saveCommission(){
   if(!currentDealId){ el('saveCommStatus').textContent='Load a deal first'; el('saveCommStatus').className='save-status err'; return; }
   el('saveCommStatus').textContent='Saving...'; el('saveCommStatus').className='save-status working';
   el('saveCommBtn').disabled=true;
-
+ 
   var t=el('dealType').value, jll=parseFloat(el('jllSplit').value)||50;
   var rateInput=parseFloat(el('commRate').value), rate=isNaN(rateInput)?DEFAULT_RATES[t]:rateInput;
   var refTypeMap={none:'None',inbound:'Inbound JLL Referral',internal:'Internal JLL Referral',external:'External Referral'};
   var refPct=0, refAmt=0;
   if(currentReferral==='inbound'){refPct=parseFloat(el('inboundSplit').value)||50; refAmt=currentGross*(refPct/100);}
   else if(currentReferral==='internal'||currentReferral==='external'){refPct=parseFloat(el('referralFee').value)||20; refAmt=currentGross*(refPct/100);}
-
+ 
   var props = {
     [PROPS.dealType]: DEAL_TYPE_MAP[t]||t,
     [PROPS.transactionValue]: Math.round(currentTransValue).toString(),
@@ -1417,7 +1417,7 @@ async function saveCommission(){
   var di=dateToTs(el('dateInvoiced').value), dr=dateToTs(el('dateReceived').value);
   if(di) props[PROPS.dateInvoiced]=di.toString();
   if(dr) props[PROPS.dateReceived]=dr.toString();
-
+ 
   try{
     var r=await hsPatch(currentDealId,{properties:props});
     if(!r.ok){ var err=await r.json(); el('saveCommStatus').textContent='Error: '+(err.message||'Could not save'); el('saveCommStatus').className='save-status err'; }
@@ -1425,10 +1425,10 @@ async function saveCommission(){
   }catch(e){ el('saveCommStatus').textContent='Connection error'; el('saveCommStatus').className='save-status err'; }
   el('saveCommBtn').disabled=false;
 }
-
+ 
 // ── ABSTRACTOR ────────────────────────────────────────────────────────────────
 var abstractFileData = null;
-
+ 
 function handleAbstractUpload(event){
   var file = event.target.files[0]; if(!file)return;
   var reader = new FileReader();
@@ -1440,7 +1440,7 @@ function handleAbstractUpload(event){
   };
   reader.readAsDataURL(file);
 }
-
+ 
 async function runAbstraction(){
   if(!abstractFileData){ alert('Upload a document first'); return; }
   el('abstractBtn').disabled=true;
@@ -1448,18 +1448,18 @@ async function runAbstraction(){
   el('abstractStatus').className='pill pill-working';
   el('abstractStatus').style.display='inline-block';
   el('abstractProgress').style.display='block';
-
+ 
   var docType = el('abstractDocType').value;
   var context = el('abstractContext').value;
   var dealContext = currentDealData ? '\nDeal context: '+JSON.stringify({
     dealname: currentDealData.dealname,
     dealtype: currentDealData.dealtype
   }) : '';
-
+ 
   var prompt = `You are a commercial real estate expert specializing in industrial properties in the Denver, Colorado market.
-
+ 
 Extract ALL key details from this ${docType} document. Return ONLY valid JSON with these exact keys (use null for fields not found):
-
+ 
 {
   "property_name": null,
   "property_address": null,
@@ -1571,11 +1571,11 @@ Extract ALL key details from this ${docType} document. Return ONLY valid JSON wi
   "lot_size_acres": null,
   "year_built_sale": null
 }
-
+ 
 ${context ? 'Additional context: '+context : ''}${dealContext}
-
+ 
 Return ONLY the JSON object, no other text.`;
-
+ 
   try{
     var payload = {
       model: 'claude-sonnet-4-20250514',
@@ -1585,28 +1585,28 @@ Return ONLY the JSON object, no other text.`;
         content: [{type:'document', source:{type:'base64', media_type:'application/pdf', data:abstractFileData.split(',')[1]}}, {type:'text',text:prompt}]
       }]
     };
-
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
+ 
+    var r = await fetch(AI_BASE, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
-
+ 
     var data = await r.json();
     var text = data.content && data.content[0] ? data.content[0].text : '';
     var clean = text.replace(/```json|```/g,'').trim();
     abstractedData = JSON.parse(clean);
     renderAbstractedFields(abstractedData);
-
+ 
   }catch(e){
     el('abstractStatus').textContent='Extraction failed — try again';
     el('abstractStatus').className='pill pill-err';
     console.error(e);
   }
-
+ 
   el('abstractBtn').disabled=false;
   el('abstractProgress').style.display='none';
 }
-
+ 
 function renderAbstractedFields(data){
   var labels = {
     property_name:'Building Name', property_address:'Address', city:'City', state:'State', zip:'Zip',
@@ -1658,12 +1658,12 @@ function renderAbstractedFields(data){
     opposing_broker_company_sale:'Opposing Broker Co (Sale)', legal_description:'Legal Description',
     parcel_number:'Parcel Number/APN', lot_size_acres:'Lot Size (acres)', year_built_sale:'Year Built (Sale)'
   };
-
+ 
   var found = Object.entries(data).filter(([k,v])=>v!==null&&v!==undefined&&v!=='');
   el('abstractCount').textContent = found.length+' fields extracted';
   el('abstractStatus').textContent = found.length+' fields extracted';
   el('abstractStatus').className = 'pill pill-ok';
-
+ 
   el('abstractedFields').innerHTML = '<div class="abstracted-fields">'+
     Object.entries(data).map(([k,v])=>{
       var lbl = labels[k]||k;
@@ -1673,14 +1673,14 @@ function renderAbstractedFields(data){
         '</div>';
     }).join('')+
   '</div>';
-
+ 
   el('abstractSaveRow').style.display = currentDealId ? 'flex' : 'none';
 }
-
+ 
 async function pushAbstractedToHubspot(){
   if(!currentDealId||!abstractedData){ alert('Load a deal and extract data first'); return; }
   el('abstractSaveStatus').textContent='Saving to HubSpot...'; el('abstractSaveStatus').className='save-status working';
-
+ 
   var props = {};
   var fieldMap = {
     // ── GROUP 1 — PROPERTY DETAILS ──────────────────────────────────────────
@@ -1712,7 +1712,7 @@ async function pushAbstractedToHubspot(){
     icd705_scif:                    'icd705scif_capable',
     property_type:                  'property_type',
     property_subtype:               'property_subtype',
-
+ 
     // ── GROUP 2 — LEASE DETAILS ──────────────────────────────────────────────
     lease_type:                     'lease_type',
     base_rent_year1_psf:            'base_rent_year_1_psf',
@@ -1767,7 +1767,7 @@ async function pushAbstractedToHubspot(){
     landlord_broker_company:        'opposing_broker_company',
     property_manager:               'property_manager',
     property_manager_phone:         'property_manager_phone',
-
+ 
     // ── GROUP 3 — SALE / PSA DETAILS ────────────────────────────────────────
     purchase_price:                 'purchase_price',
     price_psf:                      'price_psf',
@@ -1799,26 +1799,26 @@ async function pushAbstractedToHubspot(){
     lot_size_acres:                 'lot_size_acres',
     year_built_sale:                'year_built_sale'
   };
-
+ 
   Object.entries(fieldMap).forEach(([src,dst])=>{
     if(abstractedData[src]!==null&&abstractedData[src]!==undefined&&abstractedData[src]!==''){
       props[dst] = abstractedData[src].toString();
     }
   });
-
+ 
   try{
     var r = await hsPatch(currentDealId, {properties:props});
     if(r.ok){ el('abstractSaveStatus').textContent='✓ Saved to HubSpot deal record — refresh HubSpot to see all fields populated.'; el('abstractSaveStatus').className='save-status ok'; }
     else { el('abstractSaveStatus').textContent='Error saving — check HubSpot property names match exactly'; el('abstractSaveStatus').className='save-status err'; }
   }catch(e){ el('abstractSaveStatus').textContent='Connection error'; el('abstractSaveStatus').className='save-status err'; }
 }
-
+ 
 function copyAbstractedText(){
   if(!abstractedData)return;
   var text = Object.entries(abstractedData).filter(([k,v])=>v!==null).map(([k,v])=>k+': '+v).join('\n');
   navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard'));
 }
-
+ 
 // ── COMPARATOR ────────────────────────────────────────────────────────────────
 function handleCompFiles(event){
   var files = Array.from(event.target.files);
@@ -1834,7 +1834,7 @@ function handleCompFiles(event){
   });
   event.target.value='';
 }
-
+ 
 function renderCompFileList(){
   el('compFileList').innerHTML = compFiles.map((f,i)=>
     '<li class="mul-item">'+
@@ -1846,13 +1846,13 @@ function renderCompFileList(){
   ).join('');
   el('compRunBtn').disabled = compFiles.length<2;
 }
-
+ 
 function removeCompFile(i){
   compFiles.splice(i,1);
   renderCompFileList();
   el('compRunBtn').disabled=compFiles.length<2;
 }
-
+ 
 async function runComparison(){
   if(compFiles.length<2){alert('Upload at least 2 proposals');return;}
   el('compRunBtn').disabled=true;
@@ -1860,7 +1860,7 @@ async function runComparison(){
   el('compStatus').className='pill pill-working';
   el('compStatus').style.display='inline-block';
   el('compProgress').style.display='block';
-
+ 
   var priorities = {
     cost: parseInt(el('p_cost').value)||8,
     ti: parseInt(el('p_ti').value)||6,
@@ -1869,16 +1869,16 @@ async function runComparison(){
     specs: parseInt(el('p_specs').value)||6,
     term: parseInt(el('p_term').value)||4
   };
-
+ 
   var client = el('compClientName').value||'Client';
   var dealType = el('compDealType').value;
   var requirements = el('compRequirements').value;
   var dealContext = currentDealData ? '\nDeal from HubSpot: '+JSON.stringify({dealname:currentDealData.dealname,dealtype:currentDealData.dealtype}) : '';
-
+ 
   var prompt = `You are a senior commercial real estate broker and deal advisor specializing in industrial properties in Denver, Colorado. You represent ${client}.
-
+ 
 Analyze these ${compFiles.length} proposals for a ${dealType.replace('_',' ')} transaction.
-
+ 
 Client priorities (1-10 scale):
 - Lowest occupancy cost: ${priorities.cost}/10
 - Best TI/upfront costs: ${priorities.ti}/10  
@@ -1886,11 +1886,11 @@ Client priorities (1-10 scale):
 - Best location: ${priorities.location}/10
 - Best building specs: ${priorities.specs}/10
 - Term preference: ${priorities.term}/10
-
+ 
 ${requirements ? 'Client requirements: '+requirements : ''}${dealContext}
-
+ 
 For each document, extract ALL key terms. Then provide a comprehensive analysis.
-
+ 
 Return ONLY valid JSON:
 {
   "proposals": [
@@ -1947,9 +1947,9 @@ Return ONLY valid JSON:
   "recommendation_memo": "Full client-ready recommendation memo in HTML format with h2, h3, p, and ul tags. Include: executive summary, property comparison, recommendation with justification, negotiation strategy, and next steps. Use <strong> for key figures. Make it professional and thorough — 600-900 words.",
   "negotiation_priority_order": ["First fight for this", "Then this", "Then this"]
 }
-
+ 
 Score each proposal 0-100 based on client priorities. Be specific with dollar figures and market comparisons. The redlines should be actionable with specific counter terms.`;
-
+ 
   try{
     var messages = [{
       role: 'user',
@@ -1962,35 +1962,35 @@ Score each proposal 0-100 based on client priorities. Be specific with dollar fi
         {type:'text', text:prompt}
       ]
     }];
-
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
+ 
+    var r = await fetch(AI_BASE, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:4000, messages})
     });
-
+ 
     var data = await r.json();
     var text = data.content&&data.content[0]?data.content[0].text:'';
     var clean = text.replace(/```json|```/g,'').trim();
     comparisonData = JSON.parse(clean);
     renderComparison(comparisonData);
-
+ 
   }catch(e){
     el('compStatus').textContent='Analysis failed — try again';
     el('compStatus').className='pill pill-err';
     console.error(e);
   }
-
+ 
   el('compRunBtn').disabled=false;
   el('compProgress').style.display='none';
 }
-
+ 
 function renderComparison(data){
   el('compResults').style.display='block';
   el('compSetupCard').style.display='none';
-
+ 
   var props = data.proposals||[];
   var notes = data.comparison_notes||{};
-
+ 
   // Scorecard
   var maxScore = Math.max(...props.map(p=>p.weighted_score||0));
   el('scorecardGrid').innerHTML = props.map(p=>{
@@ -2003,10 +2003,10 @@ function renderComparison(data){
       '<div class="score-bar-wrap"><div class="score-bar" style="width:'+((p.weighted_score||0))+'%"></div></div>'+
     '</div>';
   }).join('');
-
+ 
   // Comparison table
   renderCompTable(props, 'all');
-
+ 
   // Redlines
   var redlines = data.redlines||[];
   var byBuilding = {};
@@ -2034,19 +2034,19 @@ function renderComparison(data){
       '</div>'+
     '</div>';
   }).join('');
-
+ 
   // Recommendation memo
   el('recMemo').innerHTML = '<h2>Proposal Analysis — '+el('compClientName').value+'</h2>'+(data.recommendation_memo||'No memo generated.');
-
+ 
   // Negotiation order
   if(data.negotiation_priority_order&&data.negotiation_priority_order.length){
     el('recMemo').innerHTML += '<h3>Negotiation Priority Order</h3><ol>'+data.negotiation_priority_order.map(i=>'<li>'+i+'</li>').join('')+'</ol>';
   }
-
+ 
   el('compStatus').textContent='Analysis complete';
   el('compStatus').className='pill pill-ok';
 }
-
+ 
 function renderCompTable(props, mode){
   var fields = [
     ['Building','building_name'],['Address','address'],['Landlord','landlord'],
@@ -2061,22 +2061,22 @@ function renderCompTable(props, mode){
     ['Power','power'],['Parking','parking'],['Sublease Rights','sublease_rights'],
     ['Special Provisions','special_provisions'],['Score','weighted_score']
   ];
-
+ 
   var html = '<table class="comp-table"><thead><tr><th>Term</th>'+
     props.map(p=>'<th>'+p.building_name+'</th>').join('')+'</tr></thead><tbody>';
-
+ 
   fields.forEach(([lbl,key])=>{
     var vals = props.map(p=>p[key]);
     var allSame = vals.every(v=>v===vals[0]);
     if(mode==='diff'&&allSame&&key!=='building_name') return;
-
+ 
     var numVals = vals.map(v=>parseFloat(v)).filter(n=>!isNaN(n));
     var minVal = numVals.length?Math.min(...numVals):null;
     var maxVal = numVals.length?Math.max(...numVals):null;
-
+ 
     var costFields = ['base_rent_psf','annual_rent','nnn_expenses','security_deposit'];
     var benefitFields = ['ti_psf','ti_total','free_rent_months','weighted_score','renewal_options','clear_height','dock_doors'];
-
+ 
     html += '<tr><td>'+lbl+'</td>'+props.map(p=>{
       var v = p[key]; var display = v!==null&&v!==undefined?v.toString():'—';
       var cls = '';
@@ -2091,16 +2091,16 @@ function renderCompTable(props, mode){
       return '<td class="'+cls+'">'+display+'</td>';
     }).join('')+'</tr>';
   });
-
+ 
   html += '</tbody></table>';
   el('compTableWrap').innerHTML = html;
 }
-
+ 
 function toggleCompView(mode){
   compViewMode = mode;
   if(comparisonData) renderCompTable(comparisonData.proposals||[], mode);
 }
-
+ 
 function resetComparison(){
   compFiles=[];
   comparisonData=null;
@@ -2110,12 +2110,12 @@ function resetComparison(){
   el('compRunBtn').disabled=true;
   el('compStatus').style.display='none';
 }
-
+ 
 async function downloadReport(){
   if(!comparisonData){alert('Run a comparison first');return;}
   var client = el('compClientName').value||'Client';
   var date = new Date().toLocaleDateString();
-
+ 
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>'+
     'body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;color:#333;font-size:13px}'+
     'h1{font-size:20px;border-bottom:2px solid #c8401a;padding-bottom:10px;color:#0c0c0e}'+
@@ -2139,28 +2139,28 @@ async function downloadReport(){
     '<h2>Redline Recommendations</h2>'+
     el('redlineBlocks').innerHTML+
     '</body></html>';
-
+ 
   var blob = new Blob([html], {type:'text/html'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href=url; a.download=client.replace(/\s+/g,'-')+'-Proposal-Analysis-'+date.replace(/\//g,'-')+'.html';
   a.click(); URL.revokeObjectURL(url);
 }
-
+ 
 // ── AI ADVISOR ────────────────────────────────────────────────────────────────
 function toggleAdvisorMode(mode, btn){
   advisorMode = mode;
   btn.closest('.toggle-group').querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
 }
-
+ 
 async function runAdvisor(){
   var context = el('advisorContext').value;
   var question = el('advisorQuestion').value;
   if(!context){alert('Describe your deal situation first');return;}
-
+ 
   el('advisorProgress').style.display='block';
-
+ 
   var modePrompts = {
     negotiate: 'Provide a specific negotiation strategy with exact counters, leverage points, and timing recommendations.',
     redlines: 'List specific redlines to request with exact counter language, market justification, and priority ranking.',
@@ -2169,24 +2169,24 @@ async function runAdvisor(){
     risk: 'Identify all risks in this deal — landlord risk, market risk, operational risk, legal risk — with mitigation strategies.',
     counter: 'Draft a specific counter proposal with exact terms, justification for each point, and a BATNA strategy.'
   };
-
+ 
   var dealCtx = currentDealData ? '\n\nHubSpot Deal Data: '+JSON.stringify({
     dealname:currentDealData.dealname, dealtype:currentDealData.dealtype,
     amount:currentDealData.amount, commission_status:currentDealData.commission_status
   }) : '';
-
+ 
   var prompt = `You are Andy Moore's AI deal advisor. Andy is an industrial commercial real estate broker at JLL in Denver, Colorado covering the Weld, Northwest, Northeast, North I-25, North Central, and West submarkets. He specializes in tenant rep, landlord rep, buyer rep, and seller rep for industrial properties.
-
+ 
 ${modePrompts[advisorMode]}
-
+ 
 Deal situation:
 ${context}
 ${question?'\nSpecific question: '+question:''}${dealCtx}
-
+ 
 Provide specific, actionable recommendations. Use bullet points and specific dollar figures where possible. Format your response with clear headers using markdown.`;
-
+ 
   try{
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
+    var r = await fetch(AI_BASE, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514', max_tokens:1500,
@@ -2195,7 +2195,7 @@ Provide specific, actionable recommendations. Use bullet points and specific dol
     });
     var data = await r.json();
     var text = data.content&&data.content[0]?data.content[0].text:'No response';
-
+ 
     // Simple markdown to HTML
     var html = text
       .replace(/^### (.+)$/gm,'<h3>$1</h3>')
@@ -2207,14 +2207,14 @@ Provide specific, actionable recommendations. Use bullet points and specific dol
       .replace(/(<li>.*<\/li>\n?)+/g,'<ul style="margin:8px 0 8px 20px;line-height:1.8">$&</ul>')
       .replace(/\n\n/g,'</p><p>')
       .replace(/^(?!<[h|u|l])/gm,'');
-
+ 
     el('advisorOutput').innerHTML = '<div style="line-height:1.7;font-size:13px"><p>'+html+'</p></div>';
   }catch(e){
     el('advisorOutput').innerHTML = '<div class="pill pill-err">Error — check connection</div>';
   }
   el('advisorProgress').style.display='none';
 }
-
+ 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 calcCommission();
 el('termMonths').value=60;
