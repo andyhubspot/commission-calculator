@@ -1,17 +1,17 @@
 [build]
   functions = "netlify/functions"
   publish = "."
- 
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
- 
+
 [[redirects]]
   from = "/deals"
   to = "/deal-platform.html"
   status = 200
- 
+
 [[redirects]]
   from = "/hubspot"
   to = "/.netlify/functions/hubspot"
