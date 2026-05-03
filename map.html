@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Front Range Zoning Map — Andy Moore | JLL</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f2ed;color:#0a0a0a;min-height:100vh}
+.header{background:#0a0a0a;color:#f5f2ed;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #c8401a}
+.header h1{font-size:15px;font-weight:700;letter-spacing:-0.02em;text-transform:uppercase}
+.header p{font-size:11px;color:#888;font-family:monospace;letter-spacing:0.06em}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 12px;background:#fff;border-bottom:0.5px solid #d4cfc9}
+.srchwrap{position:relative;flex:1;min-width:200px}
+.srchwrap input{width:100%;padding:6px 70px 6px 28px;font-size:12px;border:0.5px solid #d4cfc9;border-radius:6px;background:#fff;color:#0a0a0a;outline:none}
+.srchwrap input:focus{border-color:#378ADD}
+.srchi{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;pointer-events:none}
+.srchbtn{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;padding:3px 8px;background:#185FA5;color:#fff;border:none;border-radius:4px;cursor:pointer}
+.suggestions{position:absolute;top:100%;left:0;right:0;background:#fff;border:0.5px solid #d4cfc9;border-radius:6px;z-index:9999;max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.12);display:none;margin-top:2px}
+.suggestion-item{padding:7px 12px;font-size:12px;cursor:pointer;border-bottom:0.5px solid #f0ece8;line-height:1.4}
+.suggestion-item:last-child{border-bottom:none}
+.suggestion-item:hover{background:#f5f2ed}
+.s-main{font-weight:500}
+.s-sub{font-size:10px;color:#888;margin-top:1px}
+.tbtn{font-size:11px;padding:5px 10px;border:0.5px solid #d4cfc9;border-radius:6px;background:#fff;color:#0a0a0a;cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.tbtn.on{color:#fff}
+.tbtn:hover:not(.on){background:#f5f2ed}
+#map{width:100%;height:calc(100vh - 200px);min-height:400px}
+.panel{display:flex;gap:0;height:calc(100vh - 52px - 48px - 4px)}
+.sidebar{width:280px;flex-shrink:0;background:#fff;border-right:0.5px solid #d4cfc9;overflow-y:auto;display:flex;flex-direction:column}
+.map-wrap{flex:1;position:relative}
+#map{width:100%;height:100%}
+.tabs{display:flex;border-bottom:0.5px solid #d4cfc9}
+.tab{font-size:11px;padding:8px 12px;cursor:pointer;color:#6b6560;border-bottom:2px solid transparent;flex:1;text-align:center;transition:all 0.15s}
+.tab.active{color:#0a0a0a;border-bottom-color:#185FA5;font-weight:500}
+.tab-content{display:none;padding:10px}
+.tab-content.active{display:block}
+.muni-card{border:0.5px solid #d4cfc9;border-radius:6px;padding:8px 10px;margin-bottom:6px;background:#fff}
+.muni-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.muni-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.muni-name{font-size:12px;font-weight:500;flex:1}
+.muni-sub{font-size:10px;color:#888}
+.muni-row{display:flex;gap:5px;align-items:center}
+.spill{font-size:10px;padding:2px 7px;border-radius:99px;background:#f0ece8;color:#6b6560;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spill.ok{background:#EAF3DE;color:#3B6D11}
+.spill.working{background:#FAEEDA;color:#854F0B}
+.spill.err{background:#FCEBEB;color:#A32D2D}
+.fbtn{font-size:10px;padding:3px 8px;border:0.5px solid #d4cfc9;border-radius:4px;background:#fff;color:#0a0a0a;cursor:pointer;white-space:nowrap}
+.fbtn:hover{background:#f5f2ed}
+.cbtn{font-size:10px;padding:3px 5px;border:0.5px solid #d4cfc9;border-radius:4px;background:transparent;color:#888;cursor:pointer}
+.cbtn:hover{color:#c8401a;border-color:#c8401a}
+.vis-btn{font-size:10px;padding:3px 6px;border:0.5px solid #d4cfc9;border-radius:4px;background:transparent;cursor:pointer;color:#888;transition:all 0.15s}
+.vis-btn.on{background:#185FA5;color:#fff;border-color:#185FA5}
+.prow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:0.5px solid #f0ece8}
+.prow:last-child{border-bottom:none}
+.plbl{font-size:11px;font-weight:500;min-width:80px}
+.pbar-wrap{flex:1;min-width:60px;height:4px;background:#f0ece8;border-radius:99px;overflow:hidden;display:none}
+.pbar{height:100%;background:#185FA5;border-radius:99px;width:0%;transition:width 0.2s}
+.legend{padding:8px 10px;border-top:0.5px solid #d4cfc9;margin-top:auto}
+.legend-title{font-size:10px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.li{display:flex;align-items:center;gap:4px;margin-bottom:3px;font-size:10px;color:#6b6560}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.lz{width:12px;height:8px;border-radius:2px;flex-shrink:0;opacity:0.6}
+.colmap{display:none;background:#f5f2ed;border-radius:6px;padding:8px;margin-top:6px;font-size:11px}
+.colmap select{font-size:11px;padding:2px 6px;border:0.5px solid #d4cfc9;border-radius:4px;background:#fff;color:#0a0a0a;margin-left:4px;max-width:120px}
+.colrow{display:flex;align-items:center;margin-bottom:4px;color:#6b6560;gap:4px;flex-wrap:wrap}
+.save-note{font-size:10px;color:#3B6D11;margin-top:4px;display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Front Range Zoning Map</h1>
+    <p>Andy Moore · Industrial Brokerage · JLL Denver</p>
+  </div>
+  <div style="font-size:10px;color:#888;text-align:right;font-family:monospace">
+    Schools · Daycares · Zoning
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="srchwrap" id="searchWrap">
+    <span class="srchi">⌕</span>
+    <input type="text" id="sb" placeholder="Search Front Range address..." oninput="onSearchInput()" onkeydown="onSearchKey(event)" autocomplete="off"/>
+    <button class="srchbtn" onclick="doSearch()">Search</button>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+  <button class="tbtn on" id="bS" style="background:#185FA5;border-color:#185FA5" onclick="togPoint('S',this,'#185FA5')">Schools</button>
+  <button class="tbtn on" id="bD" style="background:#BA7517;border-color:#BA7517" onclick="togPoint('D',this,'#BA7517')">Daycares</button>
+  <button class="tbtn" onclick="map.setView([39.7392,-104.9903],11)">Reset</button>
+</div>
+
+<div class="panel">
+  <div class="sidebar">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('zoning',this)">Zoning</div>
+      <div class="tab" onclick="showTab('schools',this)">Schools</div>
+      <div class="tab" onclick="showTab('daycares',this)">Daycares</div>
+    </div>
+
+    <div id="tab-zoning" class="tab-content active">
+      <div id="muniGrid"></div>
+    </div>
+
+    <div id="tab-schools" class="tab-content">
+      <div class="prow">
+        <span class="plbl">Schools CSV</span>
+        <label class="fbtn">Import<input type="file" accept=".csv" style="display:none" onchange="fileLoaded(event,'school')"/></label>
+      </div>
+      <div class="prow">
+        <span class="spill" id="stS">Not loaded</span>
+        <div class="pbar-wrap" id="pbwS"><div class="pbar" id="pbS"></div></div>
+        <button class="cbtn" onclick="clearPoints('schools','stS')">Clear</button>
+      </div>
+      <div class="colmap" id="cmS">
+        <div class="colrow">Name <select id="colNameS"></select></div>
+        <div class="colrow" style="margin-top:3px">Address <select id="colAddrS"></select></div>
+        <div class="colrow" style="margin-top:3px">City (opt) <select id="colCityS"><option value="">(none)</option></select></div>
+        <div class="colrow" style="margin-top:3px">Type (opt) <select id="colTypeS"><option value="">(none)</option></select></div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="fbtn" onclick="startGeocode('school')" style="background:#185FA5;color:#fff;border-color:#185FA5">Start geocoding</button>
+          <button class="cbtn" onclick="document.getElementById('cmS').style.display='none'">Cancel</button>
+        </div>
+      </div>
+      <div class="save-note" id="snS">✓ Saved to Netlify — loads automatically next time</div>
+    </div>
+
+    <div id="tab-daycares" class="tab-content">
+      <div class="prow">
+        <span class="plbl">Daycares CSV</span>
+        <label class="fbtn">Import<input type="file" accept=".csv" style="display:none" onchange="fileLoaded(event,'daycare')"/></label>
+      </div>
+      <div class="prow">
+        <span class="spill" id="stD">Not loaded</span>
+        <div class="pbar-wrap" id="pbwD"><div class="pbar" id="pbD"></div></div>
+        <button class="cbtn" onclick="clearPoints('daycares','stD')">Clear</button>
+      </div>
+      <div class="colmap" id="cmD">
+        <div class="colrow">Name <select id="colNameD"></select></div>
+        <div class="colrow" style="margin-top:3px">Address <select id="colAddrD"></select></div>
+        <div class="colrow" style="margin-top:3px">City (opt) <select id="colCityD"><option value="">(none)</option></select></div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="fbtn" onclick="startGeocode('daycare')" style="background:#BA7517;color:#fff;border-color:#BA7517">Start geocoding</button>
+          <button class="cbtn" onclick="document.getElementById('cmD').style.display='none'">Cancel</button>
+        </div>
+      </div>
+      <div class="save-note" id="snD">✓ Saved to Netlify — loads automatically next time</div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-title">Legend</div>
+      <div class="li"><div class="ld" style="background:#185FA5"></div>Public school</div>
+      <div class="li"><div class="ld" style="background:#993C1D"></div>Private school</div>
+      <div class="li"><div class="ld" style="background:#3B6D11"></div>Charter school</div>
+      <div class="li"><div class="ld" style="background:#BA7517"></div>Daycare</div>
+      <div class="li"><div class="lz" style="background:#185FA5"></div>Residential</div>
+      <div class="li"><div class="lz" style="background:#3B6D11"></div>Commercial</div>
+      <div class="li"><div class="lz" style="background:#BA7517"></div>Industrial</div>
+      <div class="li"><div class="lz" style="background:#993C1D"></div>Mixed use</div>
+      <div class="li"><div class="lz" style="background:#888780"></div>Open space</div>
+      <div class="li"><div class="lz" style="background:#7F77DD"></div>Other / PUD</div>
+    </div>
+  </div>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var map, SL, DL, SM;
+var muniLayers={}, muniVis={};
+var parsedRows={school:[], daycare:[]};
+var geocoding=false;
+var searchTimeout=null;
+var selectedSuggestion=-1;
+var currentSuggestions=[];
+var VIEWBOX='-105.6,39.4,-104.4,40.3';
+var API='/.netlify/functions/mapdata';
+
+var MUNIS=[
+  {id:'denver',     name:'Denver',        sub:'North Central',          color:'#185FA5'},
+  {id:'aurora',     name:'Aurora',        sub:'Airport / I-70 East',   color:'#993C1D'},
+  {id:'lakewood',   name:'Lakewood',      sub:'West',                   color:'#3B6D11'},
+  {id:'arvada',     name:'Arvada',        sub:'Northwest',              color:'#BA7517'},
+  {id:'westminster',name:'Westminster',   sub:'NW / North I-25',        color:'#7F77DD'},
+  {id:'thornton',   name:'Thornton',      sub:'NE / North I-25',        color:'#534AB7'},
+  {id:'broomfield', name:'Broomfield',    sub:'Northwest',              color:'#0F6E56'},
+  {id:'commerce',   name:'Commerce City', sub:'Northeast',              color:'#D85A30'},
+  {id:'brighton',   name:'Brighton',      sub:'NE / Weld',              color:'#8B6914'},
+  {id:'northglenn', name:'Northglenn',    sub:'North I-25',             color:'#639922'},
+  {id:'englewood',  name:'Englewood',     sub:'South Central',          color:'#D4537E'},
+  {id:'littleton',  name:'Littleton',     sub:'Southwest',              color:'#888780'},
+  {id:'golden',     name:'Golden',        sub:'West',                   color:'#EF9F27'},
+  {id:'wheatridge', name:'Wheat Ridge',   sub:'West / North Central',   color:'#5DCAA5'},
+  {id:'greeley',    name:'Greeley',       sub:'Weld',                   color:'#AFA9EC'},
+  {id:'longmont',   name:'Longmont',      sub:'Weld / North',           color:'#F0997B'}
+];
+
+// ─── NETLIFY BLOB API ──────────────────────────────────────────────────────
+async function apiSave(key, data) {
+  const res = await fetch(API+'?key='+encodeURIComponent(key), {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: data
+  });
+  return res.ok;
+}
+
+async function apiLoad(key) {
+  try {
+    const res = await fetch(API+'?key='+encodeURIComponent(key));
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.found ? json.data : null;
+  } catch(e) { return null; }
+}
+
+async function apiDelete(key) {
+  await fetch(API+'?key='+encodeURIComponent(key), {method:'DELETE'});
+}
+
+// ─── ZONE COLORS ──────────────────────────────────────────────────────────
+function getZoneCode(p){
+  return p.ZONE_DISTRICT||p.zone_district||p.ZONE_CLASS||p.zone_class||
+         p.ZONING||p.zoning||p.ZONE_DIST||p.zone_dist||p.ZONEDIST||
+         p.ZoneType||p.ZONE_TYPE||p.ZoningCode||p.ZONING_CODE||
+         p.ZONE||p.zone||p.Class||p.CLASS||'';
+}
+function getZoneDesc(p){
+  return p.ZONE_DESCRIPTION||p.zone_description||p.ZONE_DESC||p.zone_desc||
+         p.DESCRIPTION||p.description||'';
+}
+function getZoneType(p){
+  return p.ZONE_DIST_TYPE||p.zone_dist_type||p.ZONE_TYPE||p.zone_type||
+         p.TYPE||p.type||'';
+}
+function colorFromType(t){
+  if(!t)return null;
+  var tl=t.toLowerCase();
+  if(tl.indexOf('residential')>=0)return'#185FA5';
+  if(tl.indexOf('commercial')>=0)return'#3B6D11';
+  if(tl.indexOf('industrial')>=0)return'#BA7517';
+  if(tl.indexOf('mixed')>=0)return'#993C1D';
+  if(tl.indexOf('open')>=0||tl.indexOf('park')>=0)return'#888780';
+  if(tl.indexOf('planned')>=0||tl.indexOf('pud')>=0)return'#7F77DD';
+  return null;
+}
+function colorFromCode(code){
+  if(!code)return'#888780';
+  var u=code.toUpperCase().trim();
+  if(u.indexOf('U-SU')===0||u.indexOf('U-RH')===0||u.indexOf('U-RX')===0||u.indexOf('U-TU')===0)return'#185FA5';
+  if(u.indexOf('S-SU')===0||u.indexOf('S-MU')===0||u.indexOf('E-SU')===0||u.indexOf('E-TU')===0)return'#185FA5';
+  if(u.indexOf('U-MX')===0||u.indexOf('U-MS')===0)return'#993C1D';
+  if(u.indexOf('C-MX')===0||u.indexOf('C-MS')===0||u.indexOf('C-CCN')===0)return'#3B6D11';
+  if(u.indexOf('I-A')===0||u.indexOf('I-B')===0||u.indexOf('I-MX')===0)return'#BA7517';
+  if(u.indexOf('OS-')===0||u==='OS')return'#888780';
+  if(u.indexOf('PUD')===0)return'#7F77DD';
+  if(u[0]==='R')return'#185FA5';
+  if(u[0]==='C'||u[0]==='B')return'#3B6D11';
+  if(u[0]==='I')return'#BA7517';
+  if(u[0]==='M')return'#993C1D';
+  return'#7F77DD';
+}
+function zoneColor(p){
+  return colorFromType(getZoneType(p))||colorFromCode(getZoneCode(p));
+}
+function buildPopup(p,muniName){
+  var code=getZoneCode(p)||'Unknown';
+  var desc=getZoneDesc(p);
+  var type=getZoneType(p);
+  var html='<b>'+muniName+' — '+code+'</b>';
+  if(type)html+='<br><small style="color:#555">'+type+'</small>';
+  if(desc&&desc!==code)html+='<br><small>'+desc+'</small>';
+  return html;
+}
+
+function micon(color,sz){
+  sz=sz||9;
+  return L.divIcon({
+    html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+color+';border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 1px 3px rgba(0,0,0,0.25)"></div>',
+    className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]
+  });
+}
+function schoolColor(t){
+  if(!t)return'#185FA5';
+  var tl=t.toLowerCase();
+  if(tl.indexOf('private')>=0)return'#993C1D';
+  if(tl.indexOf('charter')>=0)return'#3B6D11';
+  return'#185FA5';
+}
+
+// ─── MAP INIT ─────────────────────────────────────────────────────────────
+function init(){
+  map=L.map('map').setView([39.7392,-104.9903],11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19
+  }).addTo(map);
+  SL=L.layerGroup().addTo(map);
+  DL=L.layerGroup().addTo(map);
+  MUNIS.forEach(function(m){
+    muniLayers[m.id]=L.layerGroup().addTo(map);
+    muniVis[m.id]=true;
+  });
+  map.on('click',function(){hideSuggestions();});
+  buildMuniGrid();
+  loadAllSaved();
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────
+function buildMuniGrid(){
+  var grid=document.getElementById('muniGrid');
+  MUNIS.forEach(function(m){
+    var card=document.createElement('div');
+    card.className='muni-card';
+    card.innerHTML=
+      '<div class="muni-header">'+
+        '<div class="muni-dot" style="background:'+m.color+'"></div>'+
+        '<div><div class="muni-name">'+m.name+'</div><div class="muni-sub">'+m.sub+'</div></div>'+
+      '</div>'+
+      '<div class="muni-row">'+
+        '<label class="fbtn">Import GeoJSON<input type="file" accept=".json,.geojson" style="display:none" onchange="importZoning(event,\''+m.id+'\')"/></label>'+
+        '<span class="spill" id="st-'+m.id+'">Not loaded</span>'+
+        '<button class="vis-btn on" id="vis-'+m.id+'" onclick="togZone(\''+m.id+'\',this)">On</button>'+
+        '<button class="cbtn" onclick="clearZone(\''+m.id+'\')">✕</button>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function showTab(name,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+function togPoint(k,btn,color){
+  var on=btn.classList.toggle('on');
+  var layer=k==='S'?SL:DL;
+  if(on){map.addLayer(layer);btn.style.background=color;btn.style.borderColor=color;btn.style.color='#fff';}
+  else{map.removeLayer(layer);btn.style.background='';btn.style.borderColor='';btn.style.color='';}
+}
+function togZone(id,btn){
+  muniVis[id]=!muniVis[id];
+  btn.classList.toggle('on',muniVis[id]);
+  btn.textContent=muniVis[id]?'On':'Off';
+  if(muniVis[id])map.addLayer(muniLayers[id]);
+  else map.removeLayer(muniLayers[id]);
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────
+function onSearchInput(){
+  var q=document.getElementById('sb').value.trim();
+  if(q.length<3){hideSuggestions();return;}
+  clearTimeout(searchTimeout);
+  searchTimeout=setTimeout(function(){fetchSuggestions(q);},300);
+}
+function fetchSuggestions(q){
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=6&addressdetails=1&countrycodes=us&viewbox='+VIEWBOX+'&bounded=1&q='+encodeURIComponent(q),{headers:{'Accept-Language':'en'}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data||!data.length){hideSuggestions();return;}
+      currentSuggestions=data;selectedSuggestion=-1;showSuggestions(data);
+    }).catch(function(){hideSuggestions();});
+}
+function showSuggestions(data){
+  var box=document.getElementById('suggestions');box.innerHTML='';
+  data.forEach(function(item,i){
+    var addr=item.address||{};
+    var main=addr.house_number&&addr.road?(addr.house_number+' '+addr.road):item.display_name.split(',')[0];
+    var sub=[addr.city||addr.town||addr.village||addr.county,addr.state].filter(Boolean).join(', ');
+    var div=document.createElement('div');div.className='suggestion-item';
+    div.innerHTML='<div class="s-main">'+main+'</div><div class="s-sub">'+sub+'</div>';
+    div.addEventListener('mousedown',function(e){e.preventDefault();selectSuggestion(i);});
+    box.appendChild(div);
+  });
+  box.style.display='block';
+}
+function hideSuggestions(){document.getElementById('suggestions').style.display='none';currentSuggestions=[];selectedSuggestion=-1;}
+function selectSuggestion(i){
+  var item=currentSuggestions[i];if(!item)return;
+  var addr=item.address||{};
+  var main=addr.house_number&&addr.road?(addr.house_number+' '+addr.road):item.display_name.split(',')[0];
+  document.getElementById('sb').value=main;hideSuggestions();
+  placeMarker(parseFloat(item.lat),parseFloat(item.lon),item.display_name);
+}
+function onSearchKey(e){
+  var items=document.getElementById('suggestions').querySelectorAll('.suggestion-item');
+  if(e.key==='ArrowDown'){e.preventDefault();selectedSuggestion=Math.min(selectedSuggestion+1,items.length-1);items.forEach(function(el,i){el.style.background=i===selectedSuggestion?'#f5f2ed':'';});}
+  else if(e.key==='ArrowUp'){e.preventDefault();selectedSuggestion=Math.max(selectedSuggestion-1,-1);items.forEach(function(el,i){el.style.background=i===selectedSuggestion?'#f5f2ed':'';});}
+  else if(e.key==='Enter'){e.preventDefault();if(selectedSuggestion>=0&&currentSuggestions[selectedSuggestion])selectSuggestion(selectedSuggestion);else doSearch();}
+  else if(e.key==='Escape'){hideSuggestions();}
+}
+function doSearch(){
+  hideSuggestions();
+  var q=document.getElementById('sb').value.trim();if(!q)return;
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&countrycodes=us&viewbox='+VIEWBOX+'&bounded=1&q='+encodeURIComponent(q),{headers:{'Accept-Language':'en'}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data&&data.length){placeMarker(parseFloat(data[0].lat),parseFloat(data[0].lon),data[0].display_name);}
+      else{
+        fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&countrycodes=us&q='+encodeURIComponent(q+' Colorado'))
+          .then(function(r){return r.json();}).then(function(d2){
+            if(d2&&d2.length)placeMarker(parseFloat(d2[0].lat),parseFloat(d2[0].lon),d2[0].display_name);
+            else alert('Address not found — try including the city name');
+          });
+      }
+    }).catch(function(){alert('Search unavailable');});
+}
+function placeMarker(lat,lng,displayName){
+  if(SM)map.removeLayer(SM);
+  SM=L.marker([lat,lng],{icon:L.divIcon({
+    html:'<div style="width:14px;height:14px;border-radius:50%;background:#7F77DD;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
+    className:'',iconSize:[14,14],iconAnchor:[7,7]
+  })}).addTo(map);
+  var parts=displayName.split(',');
+  SM.bindPopup('<b>'+parts[0]+'</b><br><small>'+parts.slice(1,3).join(',')+'</small>').openPopup();
+  map.setView([lat,lng],displayName.match(/^\d+\s/)?18:15);
+}
+
+// ─── ZONING IMPORT ────────────────────────────────────────────────────────
+function renderGeoJSON(gj,muniId){
+  var m=MUNIS.find(function(x){return x.id===muniId;});
+  var count=0;
+  L.geoJSON(gj,{
+    style:function(feature){
+      var p=feature.properties||{};
+      var color=zoneColor(p);
+      return{color:color,weight:0.4,fillColor:color,fillOpacity:0.22,opacity:0.65};
+    },
+    onEachFeature:function(feature,layer){
+      var p=feature.properties||{};
+      layer.bindPopup(buildPopup(p,m.name));count++;
+    }
+  }).addTo(muniLayers[muniId]);
+  return count;
+}
+
+async function importZoning(ev,muniId){
+  var file=ev.target.files[0];if(!file)return;
+  var m=MUNIS.find(function(x){return x.id===muniId;});
+  var st=document.getElementById('st-'+muniId);
+  st.className='spill working';st.textContent='Loading...';
+  var reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      var raw=e.target.result;
+      var gj=JSON.parse(raw);
+      muniLayers[muniId].clearLayers();
+      var count=renderGeoJSON(gj,muniId);
+      st.textContent='Saving to Netlify...';
+      var saved=await apiSave('zone-'+muniId,raw);
+      if(saved){
+        st.className='spill ok';
+        st.textContent=count+' zones ✓ saved';
+      }else{
+        st.className='spill ok';
+        st.textContent=count+' zones loaded (save failed — re-import on reload)';
+      }
+    }catch(err){
+      st.className='spill err';st.textContent='Invalid GeoJSON';console.error(err);
+    }
+  };
+  reader.readAsText(file);ev.target.value='';
+}
+
+async function clearZone(muniId){
+  muniLayers[muniId].clearLayers();
+  await apiDelete('zone-'+muniId);
+  document.getElementById('st-'+muniId).className='spill';
+  document.getElementById('st-'+muniId).textContent='Not loaded';
+}
+
+// ─── CSV & GEOCODING ──────────────────────────────────────────────────────
+function parseCSV(txt){
+  var lines=txt.trim().split('\n');
+  var hdrs=lines[0].split(',').map(function(h){return h.trim().replace(/^"|"$/g,'');});
+  return{headers:hdrs,rows:lines.slice(1).map(function(ln){
+    var vals=[],inQ=false,cur='';
+    for(var i=0;i<ln.length;i++){var c=ln[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=c;}
+    vals.push(cur.trim());var obj={};hdrs.forEach(function(h,i){obj[h]=vals[i]||'';});return obj;
+  })};
+}
+function fileLoaded(ev,type){
+  var file=ev.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var parsed=parseCSV(e.target.result);
+    parsedRows[type]=parsed.rows;var hdrs=parsed.headers;
+    var isS=type==='school';
+    var cm=document.getElementById(isS?'cmS':'cmD');
+    ['colName','colAddr','colCity','colType'].forEach(function(id){
+      var el=document.getElementById(id+(isS?'S':'D'));if(!el)return;
+      while(el.options.length>(id==='colCity'||id==='colType'?1:0))el.remove(el.options.length-1);
+      hdrs.forEach(function(h){var opt=document.createElement('option');opt.value=h;opt.textContent=h;el.appendChild(opt);});
+      var lh=function(h){return h.toLowerCase();};
+      if(id==='colName'){var b=hdrs.find(function(h){return lh(h).indexOf('name')>=0||lh(h).indexOf('school')>=0||lh(h).indexOf('facility')>=0||lh(h).indexOf('center')>=0;});if(b)el.value=b;}
+      if(id==='colAddr'){var b=hdrs.find(function(h){return lh(h).indexOf('addr')>=0||lh(h).indexOf('street')>=0||lh(h).indexOf('location')>=0;});if(b)el.value=b;}
+    });
+    cm.style.display='block';
+    var st=document.getElementById(isS?'stS':'stD');
+    st.className='spill working';st.textContent=parsed.rows.length+' rows ready';
+  };
+  reader.readAsText(file);ev.target.value='';
+}
+
+async function startGeocode(type){
+  if(geocoding){alert('Already geocoding — please wait');return;}
+  var isS=type==='school';
+  var colName=document.getElementById(isS?'colNameS':'colNameD').value;
+  var colAddr=document.getElementById(isS?'colAddrS':'colAddrD').value;
+  var colCity=document.getElementById(isS?'colCityS':'colCityD').value;
+  var colType=isS?document.getElementById('colTypeS').value:'';
+  var rows=parsedRows[type];
+  if(!rows||!rows.length){alert('No rows loaded');return;}
+  document.getElementById(isS?'cmS':'cmD').style.display='none';
+
+  var storageKey=type+'s'; // 'schools' or 'daycares'
+  var existing=[];
+  var raw=await apiLoad(storageKey);
+  if(raw)try{existing=JSON.parse(raw);}catch(e){}
+
+  var existingNames=new Set(existing.map(function(r){return r.n;}));
+  var toProcess=rows.filter(function(r){return!existingNames.has(r[colName]||'');});
+
+  var st=document.getElementById(isS?'stS':'stD');
+  var pbw=document.getElementById(isS?'pbwS':'pbwD');
+  var pb=document.getElementById(isS?'pbS':'pbD');
+  pbw.style.display='block';geocoding=true;
+  var added=0,failed=0,total=toProcess.length;
+
+  for(var i=0;i<toProcess.length;i++){
+    var row=toProcess[i];
+    var name=row[colName]||'Unknown';
+    var addr=row[colAddr]||'';
+    var city=colCity&&colCity!==''?row[colCity]:'';
+    var typeVal=colType&&colType!==''?row[colType]:(isS?'public':'daycare');
+    var full=addr+(city?' '+city:'')+' Colorado';
+    st.className='spill working';
+    st.textContent=(i+1)+'/'+total+' geocoding... ('+added+' saved)';
+    pb.style.width=Math.round(((i+1)/total)*100)+'%';
+    try{
+      var r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&countrycodes=us&q='+encodeURIComponent(full));
+      var data=await r.json();
+      if(data&&data.length){
+        var lat=parseFloat(data[0].lat),lng=parseFloat(data[0].lon);
+        var item={n:name,lat:lat,lng:lng,t:typeVal};existing.push(item);
+        L.marker([lat,lng],{icon:micon(isS?schoolColor(typeVal):'#BA7517',10)})
+         .bindPopup('<b>'+name+'</b><br><small>'+typeVal+'</small>').addTo(isS?SL:DL);
+        added++;
+        if(added%25===0)await apiSave(storageKey,JSON.stringify(existing));
+      }else failed++;
+    }catch(e){failed++;}
+    await new Promise(function(res){setTimeout(res,1150);});
+  }
+
+  await apiSave(storageKey,JSON.stringify(existing));
+  geocoding=false;pbw.style.display='none';
+  st.className='spill ok';
+  st.textContent=existing.length+' saved to Netlify'+(failed?' ('+failed+' failed)':'');
+  var sn=document.getElementById(isS?'snS':'snD');
+  sn.style.display='block';
+}
+
+function addSavedMarker(item,layer){
+  var color=layer===SL?schoolColor(item.t||'public'):'#BA7517';
+  L.marker([item.lat,item.lng],{icon:micon(color,10)})
+   .bindPopup('<b>'+item.n+'</b>'+(item.t?'<br><small>'+item.t+'</small>':''))
+   .addTo(layer);
+}
+
+async function loadAllSaved(){
+  // Load schools
+  var schoolRaw=await apiLoad('schools');
+  if(schoolRaw){
+    try{
+      var schools=JSON.parse(schoolRaw);
+      schools.forEach(function(item){addSavedMarker(item,SL);});
+      document.getElementById('stS').className='spill ok';
+      document.getElementById('stS').textContent=schools.length+' schools loaded';
+    }catch(e){}
+  }
+
+  // Load daycares
+  var dayRaw=await apiLoad('daycares');
+  if(dayRaw){
+    try{
+      var daycares=JSON.parse(dayRaw);
+      daycares.forEach(function(item){addSavedMarker(item,DL);});
+      document.getElementById('stD').className='spill ok';
+      document.getElementById('stD').textContent=daycares.length+' daycares loaded';
+    }catch(e){}
+  }
+
+  // Load zoning for all municipalities
+  MUNIS.forEach(async function(m){
+    var st=document.getElementById('st-'+m.id);
+    var raw=await apiLoad('zone-'+m.id);
+    if(!raw){st.className='spill';st.textContent='Not loaded';return;}
+    try{
+      var gj=JSON.parse(raw);
+      muniLayers[m.id].clearLayers();
+      var count=renderGeoJSON(gj,m.id);
+      st.className='spill ok';st.textContent=count+' zones ✓';
+    }catch(e){st.className='spill';st.textContent='Not loaded';}
+  });
+}
+
+async function clearPoints(type,stId){
+  var layer=type==='schools'?SL:DL;
+  layer.clearLayers();
+  await apiDelete(type);
+  document.getElementById(stId).className='spill';
+  document.getElementById(stId).textContent='Not loaded';
+}
+
+document.addEventListener('click',function(e){
+  if(!document.getElementById('searchWrap').contains(e.target))hideSuggestions();
+});
+
+window.addEventListener('load',function(){setTimeout(init,200);});
+</script>
+</body>
+</html>
