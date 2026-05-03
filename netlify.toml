@@ -8,6 +8,11 @@
   status = 200
  
 [[redirects]]
+  from = "/deals"
+  to = "/deal-platform.html"
+  status = 200
+ 
+[[redirects]]
   from = "/hubspot"
   to = "/.netlify/functions/hubspot"
   status = 200
