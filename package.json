@@ -1,8 +1,0 @@
-{
-  "name": "andy-moore-jll-platform",
-  "version": "1.0.0",
-  "description": "Deal Intelligence Platform — Andy Moore | JLL Denver",
-  "dependencies": {
-    "@netlify/blobs": "^8.1.0"
-  }
-}
