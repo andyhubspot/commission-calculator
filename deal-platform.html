@@ -748,6 +748,7 @@ input[type=range] {
   .nav-tab { padding: 12px 14px; font-size: 11px; }
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 
@@ -1506,19 +1507,78 @@ async function saveCommission(){
   el('saveCommBtn').disabled=false;
 }
 
+// ── DOCUMENT UTILITIES ───────────────────────────────────────────────────────
+
+// Returns {type:'pdf', data: base64string} or {type:'text', data: plaintext}
+async function readDocumentFile(file){
+  return new Promise((resolve, reject) => {
+    var ext = file.name.split('.').pop().toLowerCase();
+    var reader = new FileReader();
+
+    if(ext === 'pdf'){
+      reader.onload = function(e){ resolve({type:'pdf', data:e.target.result, name:file.name, size:file.size}); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    } else if(ext === 'docx' || ext === 'doc'){
+      reader.onload = function(e){
+        var arrayBuffer = e.target.result;
+        mammoth.extractRawText({arrayBuffer: arrayBuffer})
+          .then(function(result){
+            if(result.value && result.value.trim().length > 50){
+              resolve({type:'text', data:result.value, name:file.name, size:file.size});
+            } else {
+              reject(new Error('Word document appears to be empty or could not be read'));
+            }
+          })
+          .catch(reject);
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    } else {
+      reject(new Error('Unsupported file type: '+ext+'. Please upload a PDF or Word document.'));
+    }
+  });
+}
+
+// Build Anthropic message content from a document object
+function docToMessageContent(doc, promptText){
+  if(doc.type === 'pdf'){
+    return [
+      {type:'document', source:{type:'base64', media_type:'application/pdf', data:doc.data.split(',')[1]}},
+      {type:'text', text:promptText}
+    ];
+  } else {
+    // Word doc — send as plain text
+    return [{type:'text', text:'Document content:
+
+'+doc.data+'
+
+---
+
+'+promptText}];
+  }
+}
+
 // ── ABSTRACTOR ────────────────────────────────────────────────────────────────
 var abstractFileData = null;
 
+var abstractDocObject = null;
+
 function handleAbstractUpload(event){
   var file = event.target.files[0]; if(!file)return;
-  var reader = new FileReader();
-  reader.onload = function(e){
-    abstractFileData = e.target.result;
-    el('abstractFileStatus').style.display='block';
-    el('abstractFileStatus').innerHTML = '<span class="pill pill-ok">✓ '+file.name+' ('+Math.round(file.size/1024)+'KB)</span>';
+  el('abstractFileStatus').style.display='block';
+  el('abstractFileStatus').innerHTML = '<span class="pill pill-working">Reading '+file.name+'...</span>';
+  el('abstractBtn').disabled=true;
+
+  readDocumentFile(file).then(function(doc){
+    abstractDocObject = doc;
+    abstractFileData = doc.data; // keep for backwards compat
+    el('abstractFileStatus').innerHTML = '<span class="pill pill-ok">✓ '+file.name+' ('+Math.round(file.size/1024)+'KB) — '+(doc.type==='pdf'?'PDF':'Word doc extracted')+'</span>';
     el('abstractBtn').disabled=false;
-  };
-  reader.readAsDataURL(file);
+  }).catch(function(err){
+    el('abstractFileStatus').innerHTML = '<span class="pill pill-err">Error: '+err.message+'</span>';
+    el('abstractBtn').disabled=true;
+  });
 }
 
 async function runAbstraction(){
@@ -1657,12 +1717,13 @@ ${context ? 'Additional context: '+context : ''}${dealContext}
 Return ONLY the JSON object, no other text.`;
 
   try{
+    if(!abstractDocObject){ throw new Error('No document loaded — please upload a file first'); }
     var payload = {
       model: 'claude-sonnet-4-5',
       max_tokens: 2000,
       messages: [{
         role: 'user',
-        content: [{type:'document', source:{type:'base64', media_type:'application/pdf', data:abstractFileData.split(',')[1]}}, {type:'text',text:prompt}]
+        content: docToMessageContent(abstractDocObject, prompt)
       }]
     };
 
@@ -2102,15 +2163,18 @@ function copyAbstractedText(){
 // ── COMPARATOR ────────────────────────────────────────────────────────────────
 function handleCompFiles(event){
   var files = Array.from(event.target.files);
+  var pending = files.length;
   files.forEach(f=>{
-    if(compFiles.length>=6){alert('Maximum 6 files');return;}
-    var reader = new FileReader();
-    reader.onload = function(e){
-      compFiles.push({name:f.name, data:e.target.result, size:f.size});
+    if(compFiles.length>=6){ pending--; return; }
+    readDocumentFile(f).then(function(doc){
+      compFiles.push(doc);
       renderCompFileList();
       el('compRunBtn').disabled = compFiles.length<2;
-    };
-    reader.readAsDataURL(f);
+    }).catch(function(err){
+      alert('Error reading '+f.name+': '+err.message);
+    }).finally(function(){
+      pending--;
+    });
   });
   event.target.value='';
 }
@@ -2118,9 +2182,11 @@ function handleCompFiles(event){
 function renderCompFileList(){
   el('compFileList').innerHTML = compFiles.map((f,i)=>
     '<li class="mul-item">'+
-      '<span style="font-size:18px">◇</span>'+
+      '<span style="font-size:18px">'+(f.type==='pdf'?'◇':'▣')+'</span>'+
       '<span class="mul-name">'+f.name+'</span>'+
-      '<span class="mul-status pill pill-neutral">'+Math.round(f.size/1024)+'KB</span>'+
+      '<span class="mul-status pill '+(f.type==='pdf'?'pill-neutral':'pill-info')+'">'+
+        (f.type==='pdf'?Math.round(f.size/1024)+'KB':'Word')+
+      '</span>'+
       '<button class="mul-remove" onclick="removeCompFile('+i+')">×</button>'+
     '</li>'
   ).join('');
@@ -2231,17 +2297,17 @@ Return ONLY valid JSON:
 Score each proposal 0-100 based on client priorities. Be specific with dollar figures and market comparisons. The redlines should be actionable with specific counter terms.`;
 
   try{
-    var messages = [{
-      role: 'user',
-      content: [
-        ...compFiles.map((f,i)=>({
-          type:'document',
-          source:{type:'base64', media_type:'application/pdf', data:f.data.split(',')[1]},
-          title: 'Proposal '+(i+1)+': '+f.name
-        })),
-        {type:'text', text:prompt}
-      ]
-    }];
+    // Build message content — mix of PDFs and Word docs
+    var msgContent = [];
+    compFiles.forEach(function(doc, i){
+      if(doc.type === 'pdf'){
+        msgContent.push({type:'document', source:{type:'base64', media_type:'application/pdf', data:doc.data.split(',')[1]}, title:'Proposal '+(i+1)+': '+doc.name});
+      } else {
+        msgContent.push({type:'text', text:'--- Proposal '+(i+1)+': '+doc.name+' ---\n\n'+doc.data+'\n\n'});
+      }
+    });
+    msgContent.push({type:'text', text:prompt});
+    var messages = [{role:'user', content:msgContent}];
 
     var r = await fetch(AI_BASE, {
       method:'POST', headers:{'Content-Type':'application/json'},
