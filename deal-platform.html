@@ -1578,7 +1578,7 @@ Return ONLY the JSON object, no other text.`;
 
   try{
     var payload = {
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 2000,
       messages: [{
         role: 'user',
@@ -1989,7 +1989,7 @@ Score each proposal 0-100 based on client priorities. Be specific with dollar fi
 
     var r = await fetch(AI_BASE, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:4000, messages})
+      body:JSON.stringify({model:'claude-sonnet-4-5', max_tokens:4000, messages})
     });
 
     var data = await r.json();
@@ -2213,7 +2213,7 @@ Provide specific, actionable recommendations. Use bullet points and specific dol
     var r = await fetch(AI_BASE, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:1500,
+        model:'claude-sonnet-4-5', max_tokens:1500,
         messages:[{role:'user', content:prompt}]
       })
     });
