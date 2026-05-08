@@ -2,6 +2,18 @@
   functions = "netlify/functions"
   publish = "."
 
+[functions]
+  node_bundler = "esbuild"
+
+[functions."ai"]
+  timeout = 30
+
+[functions."hubspot"]
+  timeout = 10
+
+[functions."mapdata"]
+  timeout = 10
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
