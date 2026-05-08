@@ -1595,10 +1595,21 @@ Return ONLY the JSON object, no other text.`;
     var text = data.content && data.content[0] ? data.content[0].text : '';
     var clean = text.replace(/```json|```/g,'').trim();
     abstractedData = JSON.parse(clean);
+
+    // Check if document was blank/template — fewer than 3 fields extracted
+    var filledFields = Object.entries(abstractedData).filter(([k,v])=>v!==null&&v!==undefined&&v!=='').length;
+    if(filledFields < 3){
+      el('abstractStatus').textContent='Document appears to be a blank template — no deal data found. Please upload an executed document with actual deal terms filled in.';
+      el('abstractStatus').className='pill pill-err';
+      el('abstractProgress').style.display='none';
+      el('abstractBtn').disabled=false;
+      return;
+    }
+
     renderAbstractedFields(abstractedData);
 
   }catch(e){
-    el('abstractStatus').textContent='Extraction failed — try again';
+    el('abstractStatus').textContent='Extraction failed — make sure you uploaded an executed document (not a blank template) in PDF format';
     el('abstractStatus').className='pill pill-err';
     console.error(e);
   }
