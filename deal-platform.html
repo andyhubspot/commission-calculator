@@ -885,6 +885,37 @@ input[type=range] {
           </div>
 
           <div class="divider"></div>
+          <div class="section-title">Co-Broker Splits (optional)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Enter any co-brokers sharing your side of the commission. Amounts calculated as % of your Adjusted Gross.</div>
+
+          <div id="coBroker1" style="margin-bottom:10px">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Co-Broker 1</div>
+            <div class="two-col">
+              <div class="field-grp"><div class="field-lbl">Name</div><input type="text" id="cb1Name" placeholder="Broker name" oninput="calcCommission()"/></div>
+              <div class="field-grp"><div class="field-lbl">Company</div><input type="text" id="cb1Company" placeholder="Brokerage" oninput="calcCommission()"/></div>
+            </div>
+            <div class="field-grp"><div class="field-lbl">Split %</div><div class="input-sfx"><input type="number" id="cb1Split" placeholder="0" step="5" min="0" max="100" oninput="calcCommission()"/><span>%</span></div></div>
+          </div>
+
+          <div id="coBroker2" style="margin-bottom:10px">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Co-Broker 2</div>
+            <div class="two-col">
+              <div class="field-grp"><div class="field-lbl">Name</div><input type="text" id="cb2Name" placeholder="Broker name" oninput="calcCommission()"/></div>
+              <div class="field-grp"><div class="field-lbl">Company</div><input type="text" id="cb2Company" placeholder="Brokerage" oninput="calcCommission()"/></div>
+            </div>
+            <div class="field-grp"><div class="field-lbl">Split %</div><div class="input-sfx"><input type="number" id="cb2Split" placeholder="0" step="5" min="0" max="100" oninput="calcCommission()"/><span>%</span></div></div>
+          </div>
+
+          <div id="coBroker3" style="margin-bottom:10px">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Co-Broker 3</div>
+            <div class="two-col">
+              <div class="field-grp"><div class="field-lbl">Name</div><input type="text" id="cb3Name" placeholder="Broker name" oninput="calcCommission()"/></div>
+              <div class="field-grp"><div class="field-lbl">Company</div><input type="text" id="cb3Company" placeholder="Brokerage" oninput="calcCommission()"/></div>
+            </div>
+            <div class="field-grp"><div class="field-lbl">Split %</div><div class="input-sfx"><input type="number" id="cb3Split" placeholder="0" step="5" min="0" max="100" oninput="calcCommission()"/><span>%</span></div></div>
+          </div>
+
+          <div class="divider"></div>
           <div class="section-title">Commission Status</div>
           <div class="two-col">
             <div class="field-grp"><div class="field-lbl">Status</div>
@@ -913,6 +944,10 @@ input[type=range] {
           <div class="result-row" id="rInboundRow" style="display:none"><span class="result-row-label" id="rInboundLbl">Inbound Split</span><span class="result-row-value" id="rInbound">—</span></div>
           <div class="result-row" id="rReferralRow" style="display:none"><span class="result-row-label" id="rReferralLbl">Referral Fee</span><span class="result-row-value" id="rReferral">—</span></div>
           <div class="result-row"><span class="result-row-label">Adjusted Gross</span><span class="result-row-value" id="rAdjusted">—</span></div>
+          <div class="result-row" id="rCb1Row" style="display:none"><span class="result-row-label" id="rCb1Lbl">Co-Broker 1</span><span class="result-row-value" id="rCb1">—</span></div>
+          <div class="result-row" id="rCb2Row" style="display:none"><span class="result-row-label" id="rCb2Lbl">Co-Broker 2</span><span class="result-row-value" id="rCb2">—</span></div>
+          <div class="result-row" id="rCb3Row" style="display:none"><span class="result-row-label" id="rCb3Lbl">Co-Broker 3</span><span class="result-row-value" id="rCb3">—</span></div>
+          <div class="result-row" id="rShareRow" style="display:none"><span class="result-row-label">Your Share Before JLL</span><span class="result-row-value" id="rShare">—</span></div>
           <div class="result-row"><span class="result-row-label" id="rJllLbl">JLL Split (50%)</span><span class="result-row-value" id="rJll">—</span></div>
           <div class="result-row" style="font-weight:700;border-top:2px solid var(--ink);margin-top:4px;padding-top:10px"><span>Your Net Commission</span><span class="result-row-value" id="rNet">—</span></div>
 
@@ -1220,7 +1255,7 @@ async function loadGlobalDeal(){
   if(!dealId){ alert('Enter a Deal ID'); return; }
   currentDealId = dealId;
 
-  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id';
+  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_three_company,cobroker_three_split';
   try{
     var r = await hsGet(dealId, propsToFetch);
     if(!r.ok){ alert('Deal not found — check the ID'); return; }
@@ -1279,6 +1314,15 @@ function populateCalculatorFromDeal(p){
   if(p.commission_notes) el('commissionNotes').value=p.commission_notes;
   if(p.referring_broker_name) el('refBrokerName').value=p.referring_broker_name;
   if(p.referring_broker_company) el('refBrokerCompany').value=p.referring_broker_company;
+  if(p.cobroker_one_name) el('cb1Name').value=p.cobroker_one_name;
+  if(p.cobroker_one_company) el('cb1Company').value=p.cobroker_one_company;
+  if(p.cobroker_one_split) el('cb1Split').value=p.cobroker_one_split;
+  if(p.cobroker_two_name) el('cb2Name').value=p.cobroker_two_name;
+  if(p.cobroker_two_company) el('cb2Company').value=p.cobroker_two_company;
+  if(p.cobroker_two_split) el('cb2Split').value=p.cobroker_two_split;
+  if(p.cobroker_three_name) el('cb3Name').value=p.cobroker_three_name;
+  if(p.cobroker_three_company) el('cb3Company').value=p.cobroker_three_company;
+  if(p.cobroker_three_split) el('cb3Split').value=p.cobroker_three_split;
   calcCommission();
 }
 
@@ -1368,15 +1412,38 @@ function calcCommission(){
     el('rInboundRow').style.display='none'; el('rReferralRow').style.display='none';
   }
 
-  var net = adjusted*((100-jll)/100);
-  el('yourNet').textContent = fmt(net);
-  el('rTransValue').textContent = fmt(transValue);
-  el('rCommRate').textContent = fmtPct(rate);
-  el('rGross').textContent = fmt(gross);
-  el('rAdjusted').textContent = fmt(adjusted);
-  el('rJllLbl').textContent = 'JLL Split ('+jll+'%)';
-  el('rJll').textContent = '('+fmt(adjusted*(jll/100))+')';
-  el('rNet').textContent = fmt(net);
+  // Co-broker splits
+  var cb1Pct=parseFloat(el('cb1Split').value)||0;
+  var cb2Pct=parseFloat(el('cb2Split').value)||0;
+  var cb3Pct=parseFloat(el('cb3Split').value)||0;
+  var cb1Amt=adjusted*(cb1Pct/100);
+  var cb2Amt=adjusted*(cb2Pct/100);
+  var cb3Amt=adjusted*(cb3Pct/100);
+  var totalCbPct=cb1Pct+cb2Pct+cb3Pct;
+  var shareBeforeJll=adjusted-cb1Amt-cb2Amt-cb3Amt;
+  var net=shareBeforeJll*((100-jll)/100);
+
+  // Show/hide co-broker rows
+  var cb1Name=el('cb1Name').value||'Co-Broker 1';
+  var cb2Name=el('cb2Name').value||'Co-Broker 2';
+  var cb3Name=el('cb3Name').value||'Co-Broker 3';
+  el('rCb1Row').style.display=cb1Pct>0?'':'none';
+  el('rCb2Row').style.display=cb2Pct>0?'':'none';
+  el('rCb3Row').style.display=cb3Pct>0?'':'none';
+  el('rShareRow').style.display=totalCbPct>0?'':'none';
+  if(cb1Pct>0){el('rCb1Lbl').textContent=cb1Name+' ('+cb1Pct+'%)';el('rCb1').textContent='('+fmt(cb1Amt)+')';}
+  if(cb2Pct>0){el('rCb2Lbl').textContent=cb2Name+' ('+cb2Pct+'%)';el('rCb2').textContent='('+fmt(cb2Amt)+')';}
+  if(cb3Pct>0){el('rCb3Lbl').textContent=cb3Name+' ('+cb3Pct+'%)';el('rCb3').textContent='('+fmt(cb3Amt)+')';}
+  el('rShare').textContent=fmt(shareBeforeJll);
+
+  el('yourNet').textContent=fmt(net);
+  el('rTransValue').textContent=fmt(transValue);
+  el('rCommRate').textContent=fmtPct(rate);
+  el('rGross').textContent=fmt(gross);
+  el('rAdjusted').textContent=fmt(adjusted);
+  el('rJllLbl').textContent='JLL Split ('+jll+'%)';
+  el('rJll').textContent='('+fmt(shareBeforeJll*(jll/100))+')';
+  el('rNet').textContent=fmt(net);
 
   var warn = el('warnBox');
   if(t==='ll_new'&&rate>2){warn.style.display='block';warn.textContent='Note: Standard LL Rep rate for new lease is 2% when tenant rep is involved.';}
@@ -1410,6 +1477,19 @@ async function saveCommission(){
     [PROPS.referralFeeAmount]: Math.round(refAmt).toString(),
     [PROPS.jllSplit]: jll.toString(),
     [PROPS.yourNetCommission]: Math.round(currentYourNet).toString(),
+    'cobroker_one_name': el('cb1Name').value||'',
+    'cobroker_one_company': el('cb1Company').value||'',
+    'cobroker_one_split': (parseFloat(el('cb1Split').value)||0).toString(),
+    'cobroker_one_amount': Math.round((parseFloat(el('cb1Split').value)||0)/100*currentAdjustedGross).toString(),
+    'cobroker_two_name': el('cb2Name').value||'',
+    'cobroker_two_company': el('cb2Company').value||'',
+    'cobroker_two_split': (parseFloat(el('cb2Split').value)||0).toString(),
+    'cobroker_two_amount': Math.round((parseFloat(el('cb2Split').value)||0)/100*currentAdjustedGross).toString(),
+    'cobroker_three_name': el('cb3Name').value||'',
+    'cobroker_three_company': el('cb3Company').value||'',
+    'cobroker_three_split': (parseFloat(el('cb3Split').value)||0).toString(),
+    'cobroker_three_amount': Math.round((parseFloat(el('cb3Split').value)||0)/100*currentAdjustedGross).toString(),
+    'your_share_before_jll': Math.round(currentAdjustedGross-((parseFloat(el('cb1Split').value)||0)+(parseFloat(el('cb2Split').value)||0)+(parseFloat(el('cb3Split').value)||0))/100*currentAdjustedGross).toString(),
     [PROPS.commissionStatus]: el('commissionStatus').value,
     [PROPS.commissionNotes]: el('commissionNotes').value||'',
     'amount': Math.round(currentYourNet).toString()
@@ -2169,15 +2249,26 @@ Score each proposal 0-100 based on client priorities. Be specific with dollar fi
     });
 
     var data = await r.json();
+
+    if(!r.ok || data.error || data.type === 'error'){
+      var apiErr = data.error ? (typeof data.error === 'string' ? data.error : JSON.stringify(data.error)) : ('HTTP '+r.status);
+      el('compStatus').textContent = 'API Error: '+apiErr;
+      el('compStatus').className = 'pill pill-err';
+      el('compRunBtn').disabled = false;
+      el('compProgress').style.display = 'none';
+      return;
+    }
+
     var text = data.content&&data.content[0]?data.content[0].text:'';
+    if(!text){ throw new Error('Empty response from AI'); }
     var clean = text.replace(/```json|```/g,'').trim();
     comparisonData = JSON.parse(clean);
     renderComparison(comparisonData);
 
   }catch(e){
-    el('compStatus').textContent='Analysis failed — try again';
+    el('compStatus').textContent='Error: '+e.message;
     el('compStatus').className='pill pill-err';
-    console.error(e);
+    console.error('Comparator error:', e);
   }
 
   el('compRunBtn').disabled=false;
@@ -2410,7 +2501,8 @@ Provide specific, actionable recommendations. Use bullet points and specific dol
 
     el('advisorOutput').innerHTML = '<div style="line-height:1.7;font-size:13px"><p>'+html+'</p></div>';
   }catch(e){
-    el('advisorOutput').innerHTML = '<div class="pill pill-err">Error — check connection</div>';
+    el('advisorOutput').innerHTML = '<div class="pill pill-err">Error: '+e.message+'</div>';
+    console.error('Advisor error:', e);
   }
   el('advisorProgress').style.display='none';
 }
