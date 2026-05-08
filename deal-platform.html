@@ -1824,17 +1824,66 @@ async function pushAbstractedToHubspot(){
     year_built_sale:                'year_built_sale'
   };
 
+  // Field type definitions for proper HubSpot formatting
+  var dateFields = new Set([
+    'lease_execution_date','lease_commencement_date','rent_commencement_date',
+    'lease_expiration_date','possession_date','ti_completion_deadline','early_access_date',
+    'renewal_notice_deadline','termination_option_date','emd_hard_date',
+    'due_diligence_expiration','financing_contingency_deadline','closing_date','possession_date_sale'
+  ]);
+  var boolFields = new Set([
+    'sprinklered','esfr_sprinkler','yard_outside_storage','rail_served','icd705_scif',
+    'nnn_expense_cap','expansion_option','right_of_first_refusal','termination_option',
+    'financing_contingency','inspection_contingency','environmental_contingency','survey_required'
+  ]);
+
+  function toHsDate(val){
+    if(!val) return null;
+    // Already a timestamp
+    if(typeof val === 'number') return val.toString();
+    var s = val.toString().trim();
+    // Try parsing various date formats
+    var d = new Date(s);
+    if(!isNaN(d.getTime())) return d.getTime().toString();
+    return null;
+  }
+
+  function toHsBool(val){
+    if(val===true||val==='true'||val==='yes'||val==='Yes'||val===1) return 'true';
+    if(val===false||val==='false'||val==='no'||val==='No'||val===0) return 'false';
+    return null;
+  }
+
   Object.entries(fieldMap).forEach(([src,dst])=>{
-    if(abstractedData[src]!==null&&abstractedData[src]!==undefined&&abstractedData[src]!==''){
-      props[dst] = abstractedData[src].toString();
+    var val = abstractedData[src];
+    if(val===null||val===undefined||val==='') return;
+    if(dateFields.has(src)){
+      var ts = toHsDate(val);
+      if(ts) props[dst] = ts;
+    } else if(boolFields.has(src)){
+      var bv = toHsBool(val);
+      if(bv) props[dst] = bv;
+    } else {
+      props[dst] = val.toString();
     }
   });
 
   try{
     var r = await hsPatch(currentDealId, {properties:props});
-    if(r.ok){ el('abstractSaveStatus').textContent='✓ Saved to HubSpot deal record — refresh HubSpot to see all fields populated.'; el('abstractSaveStatus').className='save-status ok'; }
-    else { el('abstractSaveStatus').textContent='Error saving — check HubSpot property names match exactly'; el('abstractSaveStatus').className='save-status err'; }
-  }catch(e){ el('abstractSaveStatus').textContent='Connection error'; el('abstractSaveStatus').className='save-status err'; }
+    if(r.ok){
+      el('abstractSaveStatus').textContent='✓ Saved to HubSpot — '+Object.keys(props).length+' fields pushed to deal record. Refresh HubSpot to see changes.';
+      el('abstractSaveStatus').className='save-status ok';
+    } else {
+      var errData = await r.json().catch(()=>({message:'Unknown error'}));
+      var errMsg = errData.message || errData.error || JSON.stringify(errData);
+      el('abstractSaveStatus').textContent='HubSpot Error: '+errMsg;
+      el('abstractSaveStatus').className='save-status err';
+      console.error('HubSpot push error:', errData, 'Props sent:', props);
+    }
+  }catch(e){
+    el('abstractSaveStatus').textContent='Connection error: '+e.message;
+    el('abstractSaveStatus').className='save-status err';
+  }
 }
 
 function copyAbstractedText(){
