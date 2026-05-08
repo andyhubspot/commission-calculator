@@ -1255,7 +1255,7 @@ async function loadGlobalDeal(){
   if(!dealId){ alert('Enter a Deal ID'); return; }
   currentDealId = dealId;
 
-  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_three_company,cobroker_three_split';
+  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split';
   try{
     var r = await hsGet(dealId, propsToFetch);
     if(!r.ok){ alert('Deal not found — check the ID'); return; }
@@ -1321,7 +1321,7 @@ function populateCalculatorFromDeal(p){
   if(p.cobroker_two_company) el('cb2Company').value=p.cobroker_two_company;
   if(p.cobroker_two_split) el('cb2Split').value=p.cobroker_two_split;
   if(p.cobroker_three_name) el('cb3Name').value=p.cobroker_three_name;
-  if(p.cobroker_three_company) el('cb3Company').value=p.cobroker_three_company;
+  if(p.cobroker_t_company) el('cb3Company').value=p.cobroker_t_company;
   if(p.cobroker_three_split) el('cb3Split').value=p.cobroker_three_split;
   calcCommission();
 }
@@ -1486,7 +1486,7 @@ async function saveCommission(){
     'cobroker_two_split': (parseFloat(el('cb2Split').value)||0).toString(),
     'cobroker_two_amount': Math.round((parseFloat(el('cb2Split').value)||0)/100*currentAdjustedGross).toString(),
     'cobroker_three_name': el('cb3Name').value||'',
-    'cobroker_three_company': el('cb3Company').value||'',
+    'cobroker_t_company': el('cb3Company').value||'',
     'cobroker_three_split': (parseFloat(el('cb3Split').value)||0).toString(),
     'cobroker_three_amount': Math.round((parseFloat(el('cb3Split').value)||0)/100*currentAdjustedGross).toString(),
     'your_share_before_jll': Math.round(currentAdjustedGross-((parseFloat(el('cb1Split').value)||0)+(parseFloat(el('cb2Split').value)||0)+(parseFloat(el('cb3Split').value)||0))/100*currentAdjustedGross).toString(),
