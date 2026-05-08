@@ -1854,6 +1854,129 @@ async function pushAbstractedToHubspot(){
     return null;
   }
 
+  // ── ENUM NORMALIZERS — map AI output to valid HubSpot option values ────────
+  var enumNorm = {
+    // property_type
+    property_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('industrial')||v.includes('warehouse')||v.includes('flex')||v.includes('distribution')||v.includes('manufacturing')) return 'Industrial';
+      if(v.includes('land')) return 'Land';
+      if(v.includes('office')) return 'Office';
+      if(v.includes('retail')) return 'Retail';
+      return null; // skip if no match
+    },
+    // property_subtype
+    property_subtype: function(v){
+      v = v.toLowerCase();
+      if(v.includes('warehouse')||v.includes('storage')||v.includes('bulk')) return 'Warehouse/Storage';
+      if(v.includes('flex')||v.includes('r&d')) return 'Flex/R&D';
+      if(v.includes('distribution')) return 'Distribution';
+      if(v.includes('cold')||v.includes('refriger')) return 'Cold Storage';
+      if(v.includes('heavy manuf')) return 'Heavy Manufacturing';
+      if(v.includes('light manuf')) return 'Light Manufacturing';
+      if(v.includes('manuf')) return 'Manufacturing';
+      if(v.includes('data center')) return 'Data Center';
+      if(v.includes('truck')||v.includes('terminal')||v.includes('transit')) return 'Truck Terminal/Hub/Transit';
+      if(v.includes('park')||v.includes('business')) return 'Business Park';
+      if(v.includes('special')) return 'Special Purpose Industrial';
+      if(v.includes('industrial land')) return 'Industrial Land';
+      if(v.includes('commercial land')) return 'Commercial Land';
+      if(v.includes('residential land')) return 'Residential Land';
+      if(v.includes('industrial')) return 'Industrial';
+      return null; // skip if no match
+    },
+    // lease_type
+    lease_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('nnn')||v.includes('triple')) return 'NNN';
+      if(v.includes('modified gross')||v.includes('mod gross')) return 'Modified Gross';
+      if(v.includes('gross')) return 'Gross';
+      return null;
+    },
+    // rent_escalation_type
+    rent_escalation_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('cpi')) return 'CPI';
+      if(v.includes('fixed')) return 'Fixed %';
+      if(v.includes('flat')) return 'Flat Amount';
+      if(v.includes('none')) return 'None';
+      return null;
+    },
+    // escalation_frequency
+    escalation_frequency: function(v){
+      v = v.toLowerCase();
+      if(v.includes('annual')||v.includes('year')) return 'Annual';
+      if(v.includes('2')||v.includes('two')) return 'Every 2 Years';
+      return 'Other';
+    },
+    // free_rent_type
+    free_rent_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('partial')) return 'Partial';
+      if(v.includes('base')) return 'Base Only';
+      return 'Full';
+    },
+    // ti_delivery_condition
+    ti_delivery_condition: function(v){
+      v = v.toLowerCase();
+      if(v.includes('as-is')||v.includes('as is')) return 'As-Is';
+      if(v.includes('warm')) return 'Warm Shell';
+      if(v.includes('cold')) return 'Cold Shell';
+      if(v.includes('white')) return 'White Box';
+      if(v.includes('turnkey')) return 'Turnkey';
+      return null;
+    },
+    // renewal_rent_type
+    renewal_rent_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('fmv')||v.includes('fair market')) return 'FMV';
+      if(v.includes('fixed')||v.includes('%')) return 'Fixed %';
+      if(v.includes('cpi')) return 'CPI';
+      return null;
+    },
+    // sublease_rights / assignment_rights
+    sublease_rights: function(v){
+      v = v.toLowerCase();
+      if(v.includes('not permit')||v.includes('no')) return 'Not Permitted';
+      if(v.includes('consent')||v.includes('approval')) return 'Landlord Consent Required';
+      if(v.includes('permit')||v.includes('yes')) return 'Permitted';
+      return null;
+    },
+    assignment_rights: function(v){
+      v = v.toLowerCase();
+      if(v.includes('not permit')||v.includes('no')) return 'Not Permitted';
+      if(v.includes('consent')||v.includes('approval')) return 'Landlord Consent Required';
+      if(v.includes('permit')||v.includes('yes')) return 'Permitted';
+      return null;
+    },
+    // rofrrofo
+    right_of_first_refusal: function(v){
+      v = v.toLowerCase();
+      if(v.includes('rofo')||v.includes('first offer')) return 'ROFO';
+      if(v.includes('rofr')||v.includes('first refusal')) return 'ROFR';
+      if(v.includes('none')||v.includes('no')||v==='false') return 'None';
+      return null;
+    },
+    // guarantor_type
+    guarantor_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('personal')) return 'Personal';
+      if(v.includes('corp')) return 'Corporate';
+      return 'None';
+    },
+    // loan_type
+    loan_type: function(v){
+      v = v.toLowerCase();
+      if(v.includes('sba')) return 'SBA';
+      if(v.includes('cmbs')) return 'CMBS';
+      if(v.includes('bridge')) return 'Bridge';
+      if(v.includes('cash')||v.includes('no loan')||v.includes('all cash')) return 'Cash';
+      return 'Conventional';
+    }
+  };
+
+  var enumFields = new Set(Object.keys(enumNorm));
+
   Object.entries(fieldMap).forEach(([src,dst])=>{
     var val = abstractedData[src];
     if(val===null||val===undefined||val==='') return;
@@ -1863,6 +1986,10 @@ async function pushAbstractedToHubspot(){
     } else if(boolFields.has(src)){
       var bv = toHsBool(val);
       if(bv) props[dst] = bv;
+    } else if(enumFields.has(src) && enumNorm[src]){
+      var ev = enumNorm[src](val.toString());
+      if(ev) props[dst] = ev;
+      // if null, skip — don't send invalid enum value
     } else {
       props[dst] = val.toString();
     }
