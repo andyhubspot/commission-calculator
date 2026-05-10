@@ -1555,13 +1555,7 @@ function docToMessageContent(doc, promptText){
     ];
   } else {
     // Word doc — send as plain text
-    return [{type:'text', text:'Document content:
-
-'+doc.data+'
-
----
-
-'+promptText}];
+    return [{type:'text', text:'Document content:\n\n'+doc.data+'\n\n---\n\n'+promptText}];
   }
 }
 
