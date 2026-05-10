@@ -1256,7 +1256,10 @@ async function loadGlobalDeal(){
   if(!dealId){ alert('Enter a Deal ID'); return; }
   currentDealId = dealId;
 
+  // Keep props list lean to avoid URL length limits
   var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split';
+  // Trim to safe URL length if needed
+  if(propsToFetch.length > 2000) propsToFetch = propsToFetch.substring(0, 2000);
   try{
     var r = await hsGet(dealId, propsToFetch);
     if(!r.ok){ alert('Deal not found — check the ID'); return; }
@@ -1272,7 +1275,10 @@ async function loadGlobalDeal(){
     el('saveCommBtn').disabled = false;
     el('calcDealTag').textContent = name;
 
-  }catch(e){ alert('Connection error — check internet'); }
+  }catch(e){
+    alert('Error loading deal: '+e.message+'. Check browser console for details.');
+    console.error('loadGlobalDeal error:', e);
+  }
 }
 
 function populateOverview(p, name, dealId){
