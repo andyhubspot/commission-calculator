@@ -1297,8 +1297,8 @@ function populateOverview(p, name, dealId){
     ['Commission Status', p.commission_status||'—'],
     ['Gross Commission', p.gross_commission ? fmt(parseFloat(p.gross_commission)) : '—'],
     ['Transaction Value', p.transaction_value ? fmt(parseFloat(p.transaction_value)) : '—'],
-    ['Commission Rate', p.commission_rate ? p.commission_rate+'%' : '—'],
-    ['JLL Split', p.jll_split ? p.jll_split+'%' : '50%'],
+    ['Commission Rate', p.commission_rate ? (parseFloat(p.commission_rate)*100)+'%' : '—'],
+    ['JLL Split', p.jll_split ? (parseFloat(p.jll_split)*100)+'%' : '50%'],
     ['Referral Type', p.referral_type||'None'],
     ['Referring Broker', p.referring_broker_name||'—'],
     ['Close Date', p.closedate ? new Date(p.closedate).toLocaleDateString() : '—'],
@@ -1313,8 +1313,8 @@ function populateOverview(p, name, dealId){
 
 function populateCalculatorFromDeal(p){
   if(p.dealtype){ var cv=DEAL_TYPE_REVERSE[p.dealtype]; if(cv){el('dealType').value=cv; onDealTypeChange();} }
-  if(p.commission_rate) el('commRate').value=p.commission_rate;
-  if(p.jll_split) el('jllSplit').value=p.jll_split;
+  if(p.commission_rate) el('commRate').value=parseFloat(p.commission_rate)*100;
+  if(p.jll_split) el('jllSplit').value=parseFloat(p.jll_split)*100;
   if(p.commission_status) el('commissionStatus').value=p.commission_status;
   if(p.date_invoiced) el('dateInvoiced').value=tsToDate(p.date_invoiced);
   if(p.date_commission_received) el('dateReceived').value=tsToDate(p.date_commission_received);
@@ -1323,13 +1323,13 @@ function populateCalculatorFromDeal(p){
   if(p.referring_broker_company) el('refBrokerCompany').value=p.referring_broker_company;
   if(p.cobroker_one_name) el('cb1Name').value=p.cobroker_one_name;
   if(p.cobroker_one_company) el('cb1Company').value=p.cobroker_one_company;
-  if(p.cobroker_one_split) el('cb1Split').value=p.cobroker_one_split;
+  if(p.cobroker_one_split) el('cb1Split').value=parseFloat(p.cobroker_one_split)*100;
   if(p.cobroker_two_name) el('cb2Name').value=p.cobroker_two_name;
   if(p.cobroker_two_company) el('cb2Company').value=p.cobroker_two_company;
-  if(p.cobroker_two_split) el('cb2Split').value=p.cobroker_two_split;
+  if(p.cobroker_two_split) el('cb2Split').value=parseFloat(p.cobroker_two_split)*100;
   if(p.cobroker_three_name) el('cb3Name').value=p.cobroker_three_name;
   if(p.cobroker_t_company) el('cb3Company').value=p.cobroker_t_company;
-  if(p.cobroker_three_split) el('cb3Split').value=p.cobroker_three_split;
+  if(p.cobroker_three_split) el('cb3Split').value=parseFloat(p.cobroker_three_split)*100;
   calcCommission();
 }
 
@@ -1472,31 +1472,39 @@ async function saveCommission(){
   if(currentReferral==='inbound'){refPct=parseFloat(el('inboundSplit').value)||50; refAmt=currentGross*(refPct/100);}
   else if(currentReferral==='internal'||currentReferral==='external'){refPct=parseFloat(el('referralFee').value)||20; refAmt=currentGross*(refPct/100);}
 
+  // HubSpot's native "Percentage" field type stores a decimal fraction (0.5 = 50%),
+  // not a whole number. The calculator UI works in whole numbers (50 = 50%), so every
+  // percent value must be divided by 100 right here before it's sent to HubSpot —
+  // otherwise HubSpot re-multiplies by 100 for display and 50% shows as 5000%.
+  var cb1PctRaw = parseFloat(el('cb1Split').value)||0;
+  var cb2PctRaw = parseFloat(el('cb2Split').value)||0;
+  var cb3PctRaw = parseFloat(el('cb3Split').value)||0;
+
   var props = {
     [PROPS.dealType]: DEAL_TYPE_MAP[t]||t,
     [PROPS.transactionValue]: Math.round(currentTransValue).toString(),
-    [PROPS.commissionRate]: rate.toString(),
+    [PROPS.commissionRate]: (rate/100).toString(),
     [PROPS.grossCommission]: Math.round(currentGross).toString(),
     [PROPS.referralType]: refTypeMap[currentReferral],
     [PROPS.referringBrokerName]: el('refBrokerName').value||'',
     [PROPS.referringBrokerCompany]: el('refBrokerCompany').value||'',
-    [PROPS.referralFee]: refPct.toString(),
+    [PROPS.referralFee]: (refPct/100).toString(),
     [PROPS.referralFeeAmount]: Math.round(refAmt).toString(),
-    [PROPS.jllSplit]: jll.toString(),
+    [PROPS.jllSplit]: (jll/100).toString(),
     [PROPS.yourNetCommission]: Math.round(currentYourNet).toString(),
     'cobroker_one_name': el('cb1Name').value||'',
     'cobroker_one_company': el('cb1Company').value||'',
-    'cobroker_one_split': (parseFloat(el('cb1Split').value)||0).toString(),
-    'cobroker_one_amount': Math.round((parseFloat(el('cb1Split').value)||0)/100*currentAdjustedGross).toString(),
+    'cobroker_one_split': (cb1PctRaw/100).toString(),
+    'cobroker_one_amount': Math.round(cb1PctRaw/100*currentAdjustedGross).toString(),
     'cobroker_two_name': el('cb2Name').value||'',
     'cobroker_two_company': el('cb2Company').value||'',
-    'cobroker_two_split': (parseFloat(el('cb2Split').value)||0).toString(),
-    'cobroker_two_amount': Math.round((parseFloat(el('cb2Split').value)||0)/100*currentAdjustedGross).toString(),
+    'cobroker_two_split': (cb2PctRaw/100).toString(),
+    'cobroker_two_amount': Math.round(cb2PctRaw/100*currentAdjustedGross).toString(),
     'cobroker_three_name': el('cb3Name').value||'',
     'cobroker_t_company': el('cb3Company').value||'',
-    'cobroker_three_split': (parseFloat(el('cb3Split').value)||0).toString(),
-    'cobroker_three_amount': Math.round((parseFloat(el('cb3Split').value)||0)/100*currentAdjustedGross).toString(),
-    'your_share_before_jll': Math.round(currentAdjustedGross-((parseFloat(el('cb1Split').value)||0)+(parseFloat(el('cb2Split').value)||0)+(parseFloat(el('cb3Split').value)||0))/100*currentAdjustedGross).toString(),
+    'cobroker_three_split': (cb3PctRaw/100).toString(),
+    'cobroker_three_amount': Math.round(cb3PctRaw/100*currentAdjustedGross).toString(),
+    'your_share_before_jll': Math.round(currentAdjustedGross-(cb1PctRaw+cb2PctRaw+cb3PctRaw)/100*currentAdjustedGross).toString(),
     [PROPS.commissionStatus]: el('commissionStatus').value,
     [PROPS.commissionNotes]: el('commissionNotes').value||'',
     'amount': Math.round(currentYourNet).toString()
