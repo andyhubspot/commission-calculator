@@ -807,16 +807,32 @@ input[type=range] {
         <div class="calc-left">
           <div class="section-title">Deal Type</div>
           <div class="field-grp">
-            <div class="field-lbl">Transaction Type</div>
+            <div class="field-lbl">Representation (from pipeline — not saved)</div>
+            <select id="dealSide" onchange="onDealTypeChange()">
+              <option value="tenant">Tenant Rep</option>
+              <option value="landlord">Landlord Rep</option>
+              <option value="seller">Seller Rep</option>
+              <option value="buyer">Buyer Rep</option>
+              <option value="dual">Dual Rep</option>
+            </select>
+          </div>
+          <div class="field-grp">
+            <div class="field-lbl">Deal Type (saves to HubSpot)</div>
             <select id="dealType" onchange="onDealTypeChange()">
-              <option value="tenant_new">Tenant Rep — New Lease</option>
-              <option value="ll_new">Landlord Rep — New Lease</option>
-              <option value="tenant_renewal">Tenant Rep — Renewal</option>
-              <option value="ll_renewal">Landlord Rep — Renewal</option>
-              <option value="seller">Seller Rep — Disposition</option>
-              <option value="buyer">Buyer Rep — Acquisition</option>
-              <option value="dual_lease">Dual Rep — Lease</option>
-              <option value="dual_sale">Dual Rep — Sale</option>
+              <option value="New Lease">New Lease</option>
+              <option value="Renewal">Renewal</option>
+              <option value="Extension">Extension</option>
+              <option value="Blend and Extend">Blend and Extend</option>
+              <option value="Expansion">Expansion</option>
+              <option value="Contraction">Contraction</option>
+              <option value="Relocation">Relocation</option>
+              <option value="Sublease">Sublease</option>
+              <option value="Assignment">Assignment</option>
+              <option value="Early Termination">Early Termination</option>
+              <option value="Build to Suit">Build to Suit</option>
+              <option value="Disposition">Disposition</option>
+              <option value="Acquisition">Acquisition</option>
+              <option value="Sale-Leaseback">Sale-Leaseback</option>
             </select>
           </div>
           <div class="field-grp">
@@ -857,7 +873,7 @@ input[type=range] {
             </div>
             <div class="two-col">
               <div class="field-grp"><div class="field-lbl">Square Footage</div><input type="number" id="sqft" placeholder="20000" oninput="calcCommission()"/></div>
-              <div class="field-grp"><div class="field-lbl">Annual Rent PSF</div><div class="input-pfx"><span>$</span><input type="number" id="psfRate" placeholder="14.00" step="0.25" oninput="calcCommission()"/></div></div>
+              <div class="field-grp"><div class="field-lbl">Year 1 Annual Rent PSF</div><div class="input-pfx"><span>$</span><input type="number" id="psfRate" placeholder="14.00" step="0.25" oninput="calcCommission()"/></div></div>
             </div>
             <div class="field-grp">
               <div class="field-lbl">Lease Term</div>
@@ -871,7 +887,20 @@ input[type=range] {
               </div>
               <input type="number" id="termMonths" value="60" oninput="calcCommission()" style="margin-top:8px"/>
             </div>
-            <div class="field-grp"><div class="field-lbl">Free Rent (months)</div><input type="number" id="freeRent" placeholder="0" oninput="calcCommission()"/></div>
+            <div class="two-col">
+              <div class="field-grp"><div class="field-lbl">Free Rent (months)</div><input type="number" id="freeRent" placeholder="0" oninput="calcCommission()"/></div>
+              <div class="field-grp"><div class="field-lbl">Annual Escalation</div><div class="input-sfx"><input type="number" id="escalation" placeholder="0" step="0.25" oninput="calcCommission()"/><span>%</span></div></div>
+            </div>
+            <div class="field-grp">
+              <div class="field-lbl">Free Rent Timing</div>
+              <select id="freeTiming" onchange="onFreeTimingChange()">
+                <option value="start">Beginning of term</option>
+                <option value="spread">Spread — first month of each lease year</option>
+                <option value="end">End of term</option>
+                <option value="custom">Custom — pick the months</option>
+              </select>
+              <input type="text" id="freeCustom" placeholder="Lease months, e.g. 1, 2, 13 or 1-3, 25" oninput="calcCommission()" style="margin-top:8px;display:none"/>
+            </div>
           </div>
 
           <div id="saleCalcFields" style="display:none">
@@ -958,11 +987,15 @@ input[type=range] {
           <div class="section-title">Lease Details</div>
           <div id="leaseResultDetails">
             <div class="result-row"><span class="result-row-label">Square Footage</span><span class="result-row-value" id="rSF">—</span></div>
-            <div class="result-row"><span class="result-row-label">Annual Rent PSF</span><span class="result-row-value" id="rPSF">—</span></div>
-            <div class="result-row"><span class="result-row-label">Annual Rent Total</span><span class="result-row-value" id="rAnnual">—</span></div>
+            <div class="result-row"><span class="result-row-label">Year 1 Rent PSF</span><span class="result-row-value" id="rPSF">—</span></div>
+            <div class="result-row"><span class="result-row-label">Year 1 Annual Rent</span><span class="result-row-value" id="rAnnual">—</span></div>
             <div class="result-row"><span class="result-row-label">Lease Term</span><span class="result-row-value" id="rTerm">—</span></div>
             <div class="result-row"><span class="result-row-label">Free Rent</span><span class="result-row-value" id="rFreeRent">—</span></div>
-            <div class="result-row" style="font-weight:700;border-top:2px solid var(--ink);margin-top:4px;padding-top:10px"><span>Total Lease Value</span><span class="result-row-value" id="rTotal">—</span></div>
+            <div class="result-row"><span class="result-row-label">Annual Escalation</span><span class="result-row-value" id="rEsc">—</span></div>
+            <div id="rSchedule" style="margin:8px 0;font-family:var(--mono);font-size:11px"></div>
+            <div class="result-row"><span class="result-row-label">Free Rent Value</span><span class="result-row-value" id="rFreeVal">—</span></div>
+            <div class="result-row"><span class="result-row-label">TLV (incl. free rent)</span><span class="result-row-value" id="rTLV">—</span></div>
+            <div class="result-row" style="font-weight:700;border-top:2px solid var(--ink);margin-top:4px;padding-top:10px"><span>Net Lease Value (commission base)</span><span class="result-row-value" id="rTotal">—</span></div>
           </div>
           <div id="saleResultDetails" style="display:none">
             <div class="result-row"><span class="result-row-label">Sale Price</span><span class="result-row-value" id="rSalePrice">—</span></div>
@@ -1202,13 +1235,83 @@ var abstractedData = null;
 var comparisonData = null;
 var compViewMode = 'all';
 
-var DEAL_TYPE_MAP = {
-  tenant_new:'Tenant Rep — New Lease', ll_new:'Landlord Rep — New Lease',
-  tenant_renewal:'Tenant Rep — Renewal', ll_renewal:'Landlord Rep — Renewal',
-  seller:'Seller Rep — Disposition', buyer:'Buyer Rep — Acquisition',
-  dual_lease:'Dual Rep — Lease', dual_sale:'Dual Rep — Sale'
+// HubSpot "Deal Type" (dealtype) is the transaction type only; the pipeline says which side
+// Andy represents. The calculator keeps the two separate and only saves Deal Type.
+var SALE_TYPES = ['Disposition','Acquisition','Sale-Leaseback'];
+var RENEWAL_TYPES = ['Renewal','Extension','Blend and Extend'];
+var PIPELINE_SIDE = {
+  '2011043568':'tenant',   // Tenant Rep - Lease
+  '2010984134':'landlord', // Landlord Rep - Lease
+  '2011005678':'seller',   // Seller Rep - Disposition
+  '2017171136':'buyer'     // Buyer Rep - Acquisition
 };
-var DEAL_TYPE_REVERSE = Object.fromEntries(Object.entries(DEAL_TYPE_MAP).map(([k,v])=>[v,k]));
+// Rent schedule with yearly escalations, the way the commission worksheet is built:
+// rent steps up each lease year from commencement, free rent comes off the front of the
+// term, and commission is paid on the rent actually collected (net lease value).
+function onFreeTimingChange(){
+  var custom = el('freeTiming').value==='custom';
+  el('freeCustom').style.display = custom?'block':'none';
+  el('freeRent').disabled = custom;
+  calcCommission();
+}
+// Which lease months (1 = first month of the term) are rent-free
+function freeMonthSet(term, freeMonths, timing, customText){
+  var set={}, free=Math.min(term,Math.max(0,Math.round(freeMonths||0))), m;
+  if(timing==='custom'){
+    (customText||'').split(/[,;\s]+/).forEach(function(part){
+      var r=part.match(/^(\d+)(?:-(\d+))?$/); if(!r) return;
+      var a=+r[1], b=r[2]?+r[2]:a;
+      for(var k=Math.min(a,b);k<=Math.max(a,b);k++){ if(k>=1&&k<=term) set[k]=true; }
+    });
+  } else if(timing==='end'){
+    for(m=term-free+1;m<=term;m++) set[m]=true;
+  } else if(timing==='spread'){
+    // month 1 of each lease year; if there are more free months than years, then month 2 of each year, and so on
+    var years=Math.ceil(term/12), placed=0;
+    for(var pass=0;pass<12&&placed<free;pass++){
+      for(var y=0;y<years&&placed<free;y++){ m=y*12+1+pass; if(m<=term&&!set[m]){ set[m]=true; placed++; } }
+    }
+  } else {
+    for(m=1;m<=free;m++) set[m]=true;
+  }
+  return set;
+}
+function buildRentSchedule(sf, psf, termMonths, freeMonths, escPct, timing, customText){
+  var rows=[], net=0, freeVal=0, term=Math.max(0,Math.round(termMonths));
+  var freeSet=freeMonthSet(term, freeMonths, timing||'start', customText);
+  var years=Math.ceil(term/12);
+  for(var y=0;y<years;y++){
+    var monthly=Math.round(sf*psf/12*Math.pow(1+escPct/100,y)*100)/100;
+    var first=y*12+1, last=Math.min(term,(y+1)*12), months=last-first+1, abated=0;
+    for(var m=first;m<=last;m++){ if(freeSet[m]) abated++; }
+    var paid=months-abated;
+    var rent=Math.round(monthly*paid*100)/100;
+    net+=rent; freeVal+=monthly*abated;
+    rows.push({year:y+1,months:months,abated:abated,paid:paid,monthly:monthly,psf:sf?monthly*12/sf:0,rent:rent});
+  }
+  return {rows:rows, net:net, freeValue:freeVal, tlv:net+freeVal, freeCount:Object.keys(freeSet).length};
+}
+// Internal key used for default rates and lease/sale layout
+function dealKey(){
+  var side = el('dealSide').value, type = el('dealType').value;
+  var isSale = SALE_TYPES.includes(type);
+  if(side==='dual') return isSale ? 'dual_sale' : 'dual_lease';
+  if(isSale) return (side==='buyer') ? 'buyer' : 'seller';
+  var renewal = RENEWAL_TYPES.includes(type);
+  if(side==='landlord' || side==='seller') return renewal ? 'll_renewal' : 'll_new';
+  return renewal ? 'tenant_renewal' : 'tenant_new';
+}
+// HubSpot percent properties hold a decimal fraction (0.04 = 4%). Some older deals still hold
+// whole numbers (4 = 4%). Read either form into a whole-number percent for the calculator.
+function pctFromHs(v, maxFraction){
+  var n = parseFloat(v);
+  if(isNaN(n)) return null;
+  var pct = (n > maxFraction) ? n : n*100;
+  return Math.round(pct*10000)/10000;
+}
+// Whole-number percent -> HubSpot decimal fraction, without floating-point noise
+function numOr(v,d){ var n=parseFloat(v); return isNaN(n)?d:n; }
+function pctToHs(n){ return (Math.round((n||0)*10000)/1000000).toString(); }
 var DEFAULT_RATES = {
   tenant_new:4, ll_new:2, tenant_renewal:3, ll_renewal:3,
   seller:3, buyer:3, dual_lease:4, dual_sale:4
@@ -1257,7 +1360,7 @@ async function loadGlobalDeal(){
   currentDealId = dealId;
 
   // Keep props list lean to avoid URL length limits
-  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split';
+  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split,rent_escalation';
   // Trim to safe URL length if needed
   if(propsToFetch.length > 2000) propsToFetch = propsToFetch.substring(0, 2000);
   try{
@@ -1291,14 +1394,14 @@ function populateOverview(p, name, dealId){
   el('overviewGrid').innerHTML =
     '<div class="overview-card primary"><div class="oc-label">Deal</div><div class="oc-value" style="font-size:1.1rem">'+name+'</div><div class="oc-sub">ID: '+dealId+'</div></div>'+
     '<div class="overview-card"><div class="oc-label">Net Commission</div><div class="oc-value">'+amount+'</div><div class="oc-sub">Deal Amount (your net)</div></div>'+
-    '<div class="overview-card"><div class="oc-label">Deal Type</div><div class="oc-value" style="font-size:1rem">'+(p.dealtype||'—')+'</div><div class="oc-sub">Pipeline type</div></div>';
+    '<div class="overview-card"><div class="oc-label">Deal Type</div><div class="oc-value" style="font-size:1rem">'+(p.dealtype||'—')+'</div><div class="oc-sub">Transaction type</div></div>';
 
   var fields = [
     ['Commission Status', p.commission_status||'—'],
     ['Gross Commission', p.gross_commission ? fmt(parseFloat(p.gross_commission)) : '—'],
     ['Transaction Value', p.transaction_value ? fmt(parseFloat(p.transaction_value)) : '—'],
-    ['Commission Rate', p.commission_rate ? (parseFloat(p.commission_rate)*100)+'%' : '—'],
-    ['JLL Split', p.jll_split ? (parseFloat(p.jll_split)*100)+'%' : '50%'],
+    ['Commission Rate', p.commission_rate ? pctFromHs(p.commission_rate,0.25)+'%' : '—'],
+    ['JLL Split', p.jll_split ? pctFromHs(p.jll_split,1)+'%' : '50%'],
     ['Referral Type', p.referral_type||'None'],
     ['Referring Broker', p.referring_broker_name||'—'],
     ['Close Date', p.closedate ? new Date(p.closedate).toLocaleDateString() : '—'],
@@ -1312,9 +1415,18 @@ function populateOverview(p, name, dealId){
 }
 
 function populateCalculatorFromDeal(p){
-  if(p.dealtype){ var cv=DEAL_TYPE_REVERSE[p.dealtype]; if(cv){el('dealType').value=cv; onDealTypeChange();} }
-  if(p.commission_rate) el('commRate').value=parseFloat(p.commission_rate)*100;
-  if(p.jll_split) el('jllSplit').value=parseFloat(p.jll_split)*100;
+  if(p.pipeline && PIPELINE_SIDE[p.pipeline]) el('dealSide').value=PIPELINE_SIDE[p.pipeline];
+  if(p.dealtype && Array.from(el('dealType').options).some(function(o){return o.value===p.dealtype;})) el('dealType').value=p.dealtype;
+  onDealTypeChange();
+  // Referral type + fee, so a save doesn't wipe what is already on the deal
+  var refKey={'Inbound JLL Referral':'inbound','Internal JLL Referral':'internal','External Referral':'external'}[p.referral_type]||'none';
+  var refBtn=document.querySelector('.tog-btn[onclick*="setReferral(\''+refKey+'\'"]');
+  if(refBtn) setReferral(refKey, refBtn);
+  var refPctLoaded=pctFromHs(p.referral_fee,1);
+  if(refPctLoaded!==null){ if(refKey==='inbound') el('inboundSplit').value=refPctLoaded; else if(refKey!=='none') el('referralFee').value=refPctLoaded; }
+  if(p.commission_rate) el('commRate').value=pctFromHs(p.commission_rate,0.25);
+  if(p.jll_split) el('jllSplit').value=pctFromHs(p.jll_split,1);
+  var escLoaded=pctFromHs(p.rent_escalation,0.25); if(escLoaded) el('escalation').value=escLoaded;
   if(p.commission_status) el('commissionStatus').value=p.commission_status;
   if(p.date_invoiced) el('dateInvoiced').value=tsToDate(p.date_invoiced);
   if(p.date_commission_received) el('dateReceived').value=tsToDate(p.date_commission_received);
@@ -1323,19 +1435,19 @@ function populateCalculatorFromDeal(p){
   if(p.referring_broker_company) el('refBrokerCompany').value=p.referring_broker_company;
   if(p.cobroker_one_name) el('cb1Name').value=p.cobroker_one_name;
   if(p.cobroker_one_company) el('cb1Company').value=p.cobroker_one_company;
-  if(p.cobroker_one_split) el('cb1Split').value=parseFloat(p.cobroker_one_split)*100;
+  if(p.cobroker_one_split) el('cb1Split').value=pctFromHs(p.cobroker_one_split,1);
   if(p.cobroker_two_name) el('cb2Name').value=p.cobroker_two_name;
   if(p.cobroker_two_company) el('cb2Company').value=p.cobroker_two_company;
-  if(p.cobroker_two_split) el('cb2Split').value=parseFloat(p.cobroker_two_split)*100;
+  if(p.cobroker_two_split) el('cb2Split').value=pctFromHs(p.cobroker_two_split,1);
   if(p.cobroker_three_name) el('cb3Name').value=p.cobroker_three_name;
   if(p.cobroker_t_company) el('cb3Company').value=p.cobroker_t_company;
-  if(p.cobroker_three_split) el('cb3Split').value=parseFloat(p.cobroker_three_split)*100;
+  if(p.cobroker_three_split) el('cb3Split').value=pctFromHs(p.cobroker_three_split,1);
   calcCommission();
 }
 
 // ── COMMISSION CALCULATOR ─────────────────────────────────────────────────────
 function onDealTypeChange(){
-  var t = el('dealType').value;
+  var t = dealKey();
   var isSale = ['seller','buyer','dual_sale'].includes(t);
   el('leaseCalcFields').style.display = isSale?'none':'block';
   el('saleCalcFields').style.display = isSale?'block':'none';
@@ -1373,7 +1485,7 @@ function updatePriorityWeight(id, val){
 }
 
 function calcCommission(){
-  var t = el('dealType').value;
+  var t = dealKey();
   var jll = parseFloat(el('jllSplit').value)||50;
   var rateInput = parseFloat(el('commRate').value);
   var rate = isNaN(rateInput)?DEFAULT_RATES[t]:rateInput;
@@ -1391,8 +1503,16 @@ function calcCommission(){
     var term = parseFloat(el('termMonths').value)||60;
     var free = parseFloat(el('freeRent').value)||0;
     var annual = sf*psf;
-    var billable = Math.max(0,term-free);
-    transValue = sf*psf*(billable/12);
+    var esc = parseFloat(el('escalation').value)||0;
+    var timing = el('freeTiming').value;
+    var sched = buildRentSchedule(sf, psf, term, free, esc, timing, el('freeCustom').value);
+    free = sched.freeCount;
+    transValue = sched.net;
+    el('rEsc').textContent = esc ? esc+'% per year' : 'None (flat)';
+    el('rFreeVal').textContent = sched.freeValue ? fmt(sched.freeValue) : '—';
+    el('rTLV').textContent = fmt(sched.tlv);
+    el('rSchedule').innerHTML = (sf&&psf) ? '<table style="width:100%;border-collapse:collapse"><tr style="text-align:right;color:#888"><td style="text-align:left">Yr</td><td>Paid mo</td><td>Monthly</td><td>PSF</td><td>Rent</td></tr>'+
+      sched.rows.map(function(r){ return '<tr style="text-align:right;border-top:1px solid #e5e5e5"><td style="text-align:left;padding:3px 0">'+r.year+'</td><td>'+r.paid+(r.abated?' (+'+r.abated+' free)':'')+'</td><td>$'+r.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>$'+r.psf.toFixed(2)+'</td><td>'+fmt(r.rent)+'</td></tr>'; }).join('')+'</table>' : '';
     gross = transValue*(rate/100);
     el('rSF').textContent = sf?sf.toLocaleString()+' SF':'—';
     el('rPSF').textContent = psf?'$'+psf.toFixed(2)+' PSF':'—';
@@ -1404,13 +1524,13 @@ function calcCommission(){
 
   var adjusted=gross, inboundDed=0, refDed=0;
   if(currentReferral==='inbound'){
-    var pct=parseFloat(el('inboundSplit').value)||50;
+    var pct=numOr(el('inboundSplit').value,50);
     inboundDed=gross*(pct/100); adjusted=gross-inboundDed;
     el('rInboundRow').style.display=''; el('rReferralRow').style.display='none';
     el('rInboundLbl').textContent='Inbound Split ('+pct+'%)';
     el('rInbound').textContent='('+fmt(inboundDed)+')';
   } else if(currentReferral==='internal'||currentReferral==='external'){
-    var pct=parseFloat(el('referralFee').value)||20;
+    var pct=numOr(el('referralFee').value,20);
     refDed=gross*(pct/100); adjusted=gross-refDed;
     el('rInboundRow').style.display='none'; el('rReferralRow').style.display='';
     el('rReferralLbl').textContent='Referral Fee ('+pct+'%)';
@@ -1465,12 +1585,12 @@ async function saveCommission(){
   el('saveCommStatus').textContent='Saving...'; el('saveCommStatus').className='save-status working';
   el('saveCommBtn').disabled=true;
 
-  var t=el('dealType').value, jll=parseFloat(el('jllSplit').value)||50;
+  var t=dealKey(), jll=parseFloat(el('jllSplit').value)||50;
   var rateInput=parseFloat(el('commRate').value), rate=isNaN(rateInput)?DEFAULT_RATES[t]:rateInput;
   var refTypeMap={none:'None',inbound:'Inbound JLL Referral',internal:'Internal JLL Referral',external:'External Referral'};
   var refPct=0, refAmt=0;
-  if(currentReferral==='inbound'){refPct=parseFloat(el('inboundSplit').value)||50; refAmt=currentGross*(refPct/100);}
-  else if(currentReferral==='internal'||currentReferral==='external'){refPct=parseFloat(el('referralFee').value)||20; refAmt=currentGross*(refPct/100);}
+  if(currentReferral==='inbound'){refPct=numOr(el('inboundSplit').value,50); refAmt=currentGross*(refPct/100);}
+  else if(currentReferral==='internal'||currentReferral==='external'){refPct=numOr(el('referralFee').value,20); refAmt=currentGross*(refPct/100);}
 
   // HubSpot's native "Percentage" field type stores a decimal fraction (0.5 = 50%),
   // not a whole number. The calculator UI works in whole numbers (50 = 50%), so every
@@ -1481,42 +1601,47 @@ async function saveCommission(){
   var cb3PctRaw = parseFloat(el('cb3Split').value)||0;
 
   var props = {
-    [PROPS.dealType]: DEAL_TYPE_MAP[t]||t,
+    [PROPS.dealType]: el('dealType').value,
     [PROPS.transactionValue]: Math.round(currentTransValue).toString(),
-    [PROPS.commissionRate]: (rate/100).toString(),
+    [PROPS.commissionRate]: pctToHs(rate),
     [PROPS.grossCommission]: Math.round(currentGross).toString(),
-    [PROPS.referralType]: refTypeMap[currentReferral],
+    [PROPS.referralType]: (currentReferral==='none' && currentDealData && currentDealData.referral_type==='Direct') ? 'Direct' : refTypeMap[currentReferral],
     [PROPS.referringBrokerName]: el('refBrokerName').value||'',
     [PROPS.referringBrokerCompany]: el('refBrokerCompany').value||'',
-    [PROPS.referralFee]: (refPct/100).toString(),
+    [PROPS.referralFee]: pctToHs(refPct),
     [PROPS.referralFeeAmount]: Math.round(refAmt).toString(),
-    [PROPS.jllSplit]: (jll/100).toString(),
+    [PROPS.jllSplit]: pctToHs(jll),
     [PROPS.yourNetCommission]: Math.round(currentYourNet).toString(),
     'cobroker_one_name': el('cb1Name').value||'',
     'cobroker_one_company': el('cb1Company').value||'',
-    'cobroker_one_split': (cb1PctRaw/100).toString(),
+    'cobroker_one_split': pctToHs(cb1PctRaw),
     'cobroker_one_amount': Math.round(cb1PctRaw/100*currentAdjustedGross).toString(),
     'cobroker_two_name': el('cb2Name').value||'',
     'cobroker_two_company': el('cb2Company').value||'',
-    'cobroker_two_split': (cb2PctRaw/100).toString(),
+    'cobroker_two_split': pctToHs(cb2PctRaw),
     'cobroker_two_amount': Math.round(cb2PctRaw/100*currentAdjustedGross).toString(),
     'cobroker_three_name': el('cb3Name').value||'',
     'cobroker_t_company': el('cb3Company').value||'',
-    'cobroker_three_split': (cb3PctRaw/100).toString(),
+    'cobroker_three_split': pctToHs(cb3PctRaw),
     'cobroker_three_amount': Math.round(cb3PctRaw/100*currentAdjustedGross).toString(),
     'your_share_before_jll': Math.round(currentAdjustedGross-(cb1PctRaw+cb2PctRaw+cb3PctRaw)/100*currentAdjustedGross).toString(),
     [PROPS.commissionStatus]: el('commissionStatus').value,
     [PROPS.commissionNotes]: el('commissionNotes').value||'',
     'amount': Math.round(currentYourNet).toString()
   };
+  var escSave=parseFloat(el('escalation').value)||0;
+  if(escSave>0 && !['seller','buyer','dual_sale'].includes(t)){ props['rent_escalation']=pctToHs(escSave); props['rent_escalation_type']='Fixed %'; }
+  if(!(currentTransValue>0)){
+    ['transaction_value','gross_commission','referral_fee_amount','your_net_commission','cobroker_one_amount','cobroker_two_amount','cobroker_three_amount','your_share_before_jll','amount'].forEach(function(k){ delete props[k]; });
+  }
   var di=dateToTs(el('dateInvoiced').value), dr=dateToTs(el('dateReceived').value);
   if(di) props[PROPS.dateInvoiced]=di.toString();
   if(dr) props[PROPS.dateReceived]=dr.toString();
 
   try{
     var r=await hsPatch(currentDealId,{properties:props});
-    if(!r.ok){ var err=await r.json(); el('saveCommStatus').textContent='Error: '+(err.message||'Could not save'); el('saveCommStatus').className='save-status err'; }
-    else { el('saveCommStatus').textContent='✓ Saved to HubSpot — commission details updated on deal record. Refresh HubSpot to see changes.'; el('saveCommStatus').className='save-status ok'; }
+    if(!r.ok){ var err=await r.json(); var why=(err.message||'Could not save'); try{ var m=why.match(/\[\{.*\}\]/); if(m){ why=JSON.parse(m[0]).map(function(x){return x.name+': '+x.message;}).join(' | '); } }catch(_){} el('saveCommStatus').textContent='Not saved — '+why; el('saveCommStatus').className='save-status err'; }
+    else { el('saveCommStatus').textContent=(currentTransValue>0)?'✓ Saved to HubSpot — commission details updated on deal record. Refresh HubSpot to see changes.':'✓ Saved rates, splits and status. Dollar amounts on the deal were left as they are because no rent or sale price is entered here.'; el('saveCommStatus').className='save-status ok'; }
   }catch(e){ el('saveCommStatus').textContent='Connection error'; el('saveCommStatus').className='save-status err'; }
   el('saveCommBtn').disabled=false;
 }
