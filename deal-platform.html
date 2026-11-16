@@ -873,7 +873,7 @@ input[type=range] {
             </div>
             <div class="two-col">
               <div class="field-grp"><div class="field-lbl">Square Footage</div><input type="number" id="sqft" placeholder="20000" oninput="calcCommission()"/></div>
-              <div class="field-grp"><div class="field-lbl">Year 1 Annual Rent PSF</div><div class="input-pfx"><span>$</span><input type="number" id="psfRate" placeholder="14.00" step="0.25" oninput="calcCommission()"/></div></div>
+              <div class="field-grp"><div class="field-lbl">Year 1 Base Rent <select id="rentBasis" onchange="calcCommission()" style="width:auto;display:inline-block;padding:1px 4px;font-size:11px;margin-left:4px"><option value="psf">$ / SF / year</option><option value="monthly">$ per month</option></select></div><div class="input-pfx"><span>$</span><input type="number" id="psfRate" placeholder="14.00" step="0.25" oninput="calcCommission()"/></div></div>
             </div>
             <div class="field-grp">
               <div class="field-lbl">Lease Term</div>
@@ -886,6 +886,14 @@ input[type=range] {
                 <button class="tog-btn" onclick="setTerm(null,this)">Custom</button>
               </div>
               <input type="number" id="termMonths" value="60" oninput="calcCommission()" style="margin-top:8px"/>
+              <select id="termMode" onchange="calcCommission()" style="margin-top:8px">
+                <option value="included">Term above already includes the free months</option>
+                <option value="added">Free months are added on top of the term above</option>
+              </select>
+            </div>
+            <div class="field-grp">
+              <div class="field-lbl">Lease Start Date (optional — dates the schedule)</div>
+              <input type="date" id="leaseStart" oninput="calcCommission()"/>
             </div>
             <div class="two-col">
               <div class="field-grp"><div class="field-lbl">Free Rent (months)</div><input type="number" id="freeRent" placeholder="0" oninput="calcCommission()"/></div>
@@ -1248,6 +1256,14 @@ var PIPELINE_SIDE = {
 // Rent schedule with yearly escalations, the way the commission worksheet is built:
 // rent steps up each lease year from commencement, free rent comes off the front of the
 // term, and commission is paid on the rent actually collected (net lease value).
+// Label a schedule row with real dates when a lease start date is entered
+function periodLabel(r){
+  var v=el('leaseStart').value; if(!v) return r.year;
+  var p=v.split('-'), y=+p[0], m=+p[1]-1, d=+p[2];
+  function at(monthsOut, dayBefore){ var dt=new Date(Date.UTC(y, m+monthsOut, d)); if(dayBefore) dt=new Date(dt.getTime()-86400000); return (dt.getUTCMonth()+1)+'/'+dt.getUTCDate()+'/'+String(dt.getUTCFullYear()).slice(2); }
+  var first=(r.year-1)*12;
+  return at(first,false)+'–'+at(first+r.months,true);
+}
 function onFreeTimingChange(){
   var custom = el('freeTiming').value==='custom';
   el('freeCustom').style.display = custom?'block':'none';
@@ -1499,9 +1515,12 @@ function calcCommission(){
     el('rSalePrice').textContent = fmt(sp);
   } else {
     var sf = parseFloat(el('sqft').value)||0;
-    var psf = parseFloat(el('psfRate').value)||0;
+    var rentIn = parseFloat(el('psfRate').value)||0;
+    // Rent can be typed the way the lease states it: $/SF/year or the year 1 monthly base rent
+    var psf = (el('rentBasis').value==='monthly') ? (sf ? rentIn*12/sf : 0) : rentIn;
     var term = parseFloat(el('termMonths').value)||60;
     var free = parseFloat(el('freeRent').value)||0;
+    if(el('termMode').value==='added' && el('freeTiming').value!=='custom') term += Math.max(0,Math.round(free));
     var annual = sf*psf;
     var esc = parseFloat(el('escalation').value)||0;
     var timing = el('freeTiming').value;
@@ -1511,8 +1530,8 @@ function calcCommission(){
     el('rEsc').textContent = esc ? esc+'% per year' : 'None (flat)';
     el('rFreeVal').textContent = sched.freeValue ? fmt(sched.freeValue) : '—';
     el('rTLV').textContent = fmt(sched.tlv);
-    el('rSchedule').innerHTML = (sf&&psf) ? '<table style="width:100%;border-collapse:collapse"><tr style="text-align:right;color:#888"><td style="text-align:left">Yr</td><td>Paid mo</td><td>Monthly</td><td>PSF</td><td>Rent</td></tr>'+
-      sched.rows.map(function(r){ return '<tr style="text-align:right;border-top:1px solid #e5e5e5"><td style="text-align:left;padding:3px 0">'+r.year+'</td><td>'+r.paid+(r.abated?' (+'+r.abated+' free)':'')+'</td><td>$'+r.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>$'+r.psf.toFixed(2)+'</td><td>'+fmt(r.rent)+'</td></tr>'; }).join('')+'</table>' : '';
+    el('rSchedule').innerHTML = (sf&&psf) ? '<table style="width:100%;border-collapse:collapse"><tr style="text-align:right;color:#888"><td style="text-align:left">'+(el('leaseStart').value?'Period':'Yr')+'</td><td>Paid mo</td><td>Monthly</td><td>PSF</td><td>Rent</td></tr>'+
+      sched.rows.map(function(r){ return '<tr style="text-align:right;border-top:1px solid #e5e5e5"><td style="text-align:left;padding:3px 0">'+periodLabel(r)+'</td><td>'+r.paid+(r.abated?' (+'+r.abated+' free)':'')+'</td><td>$'+r.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>$'+r.psf.toFixed(2)+'</td><td>'+fmt(r.rent)+'</td></tr>'; }).join('')+'</table>' : '';
     gross = transValue*(rate/100);
     el('rSF').textContent = sf?sf.toLocaleString()+' SF':'—';
     el('rPSF').textContent = psf?'$'+psf.toFixed(2)+' PSF':'—';
