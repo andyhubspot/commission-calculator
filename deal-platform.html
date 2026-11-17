@@ -892,7 +892,7 @@ input[type=range] {
               </select>
             </div>
             <div class="field-grp">
-              <div class="field-lbl">Lease Start Date (optional — dates the schedule)</div>
+              <div class="field-lbl">Lease Commencement Date (sets the expiration date)</div>
               <input type="date" id="leaseStart" oninput="calcCommission()"/>
             </div>
             <div class="two-col">
@@ -909,6 +909,46 @@ input[type=range] {
               </select>
               <input type="text" id="freeCustom" placeholder="Lease months, e.g. 1, 2, 13 or 1-3, 25" oninput="calcCommission()" style="margin-top:8px;display:none"/>
             </div>
+            <div class="field-grp">
+              <div class="field-lbl">TI Allowance <select id="tiBasis" onchange="calcCommission()" style="width:auto;display:inline-block;padding:1px 4px;font-size:11px;margin-left:4px"><option value="psf">$ / SF</option><option value="total">$ total</option></select></div>
+              <div class="input-pfx"><span>$</span><input type="number" id="tiAllowance" placeholder="0" step="0.5" oninput="calcCommission()"/></div>
+            </div>
+            <div class="two-col">
+              <div class="field-grp">
+                <div class="field-lbl">Escalation Frequency</div>
+                <select id="escFreq" onchange="onLeaseOptionChange()">
+                  <option value="Annual">Annual</option>
+                  <option value="Every 2 Years">Every 2 Years</option>
+                  <option value="Other">Other (months)</option>
+                </select>
+                <input type="number" id="escFreqMonths" placeholder="Months between increases" oninput="calcCommission()" style="margin-top:8px;display:none"/>
+              </div>
+              <div class="field-grp">
+                <div class="field-lbl">Free Rent Type</div>
+                <select id="freeType" onchange="onLeaseOptionChange()">
+                  <option value="Full">Full (base rent + NNN)</option>
+                  <option value="Base Only">Base Only (tenant pays NNN)</option>
+                  <option value="Partial">Partial (% of base rent)</option>
+                </select>
+                <div class="input-sfx" id="freePartialWrap" style="margin-top:8px;display:none"><input type="number" id="freePartialPct" value="50" oninput="calcCommission()"/><span>% abated</span></div>
+              </div>
+            </div>
+            <details style="margin-top:6px">
+              <summary style="cursor:pointer;font-size:12px;font-weight:600;padding:6px 0">More lease terms — custom rent steps, NNN, concessions, discount rate</summary>
+              <div class="field-grp">
+                <div class="field-lbl">Custom Rent Steps (optional — overrides the escalation)</div>
+                <textarea id="rentSteps" rows="2" placeholder="Rent for each step in order, same units as Year 1 Base Rent. e.g. 10992.30, 11432.00, 11889.28" oninput="calcCommission()" style="width:100%"></textarea>
+              </div>
+              <div class="two-col">
+                <div class="field-grp"><div class="field-lbl">NNN Expenses PSF / yr</div><div class="input-pfx"><span>$</span><input type="number" id="nnnPsf" placeholder="0" step="0.05" oninput="calcCommission()"/></div></div>
+                <div class="field-grp"><div class="field-lbl">Discount Rate (for NPV effective rent)</div><div class="input-sfx"><input type="number" id="discRate" placeholder="8" step="0.25" oninput="calcCommission()"/><span>%</span></div></div>
+              </div>
+              <div class="two-col">
+                <div class="field-grp"><div class="field-lbl">Moving Allowance</div><div class="input-pfx"><span>$</span><input type="number" id="moveAllow" placeholder="0" oninput="calcCommission()"/></div></div>
+                <div class="field-grp"><div class="field-lbl">Landlord Work Cost</div><div class="input-pfx"><span>$</span><input type="number" id="llWork" placeholder="0" oninput="calcCommission()"/></div></div>
+              </div>
+              <div class="field-grp"><div class="field-lbl">Other Concessions (lease buyout, etc.)</div><div class="input-pfx"><span>$</span><input type="number" id="otherConc" placeholder="0" oninput="calcCommission()"/></div></div>
+            </details>
           </div>
 
           <div id="saleCalcFields" style="display:none">
@@ -999,11 +1039,29 @@ input[type=range] {
             <div class="result-row"><span class="result-row-label">Year 1 Annual Rent</span><span class="result-row-value" id="rAnnual">—</span></div>
             <div class="result-row"><span class="result-row-label">Lease Term</span><span class="result-row-value" id="rTerm">—</span></div>
             <div class="result-row"><span class="result-row-label">Free Rent</span><span class="result-row-value" id="rFreeRent">—</span></div>
+            <div class="result-row"><span class="result-row-label">Lease Expiration</span><span class="result-row-value" id="rExpire">—</span></div>
             <div class="result-row"><span class="result-row-label">Annual Escalation</span><span class="result-row-value" id="rEsc">—</span></div>
             <div id="rSchedule" style="margin:8px 0;font-family:var(--mono);font-size:11px"></div>
             <div class="result-row"><span class="result-row-label">Free Rent Value</span><span class="result-row-value" id="rFreeVal">—</span></div>
             <div class="result-row"><span class="result-row-label">TLV (incl. free rent)</span><span class="result-row-value" id="rTLV">—</span></div>
             <div class="result-row" style="font-weight:700;border-top:2px solid var(--ink);margin-top:4px;padding-top:10px"><span>Net Lease Value (commission base)</span><span class="result-row-value" id="rTotal">—</span></div>
+          </div>
+          <div id="effectiveResults" style="display:none;margin-top:14px">
+            <div class="section-title">Effective Rent</div>
+            <div class="result-row"><span class="result-row-label">TI Allowance</span><span class="result-row-value" id="rTI">—</span></div>
+            <div class="result-row" id="rConcRow"><span class="result-row-label">Other Concessions</span><span class="result-row-value" id="rConc">—</span></div>
+            <div class="result-row"><span class="result-row-label">Average Rent (free rent blended in)</span><span class="result-row-value" id="rAvgRent">—</span></div>
+            <div class="result-row"><span class="result-row-label">Net Effective Rent (after free rent + concessions)</span><span class="result-row-value" id="rNER">—</span></div>
+            <div class="result-row"><span class="result-row-label">Landlord Net Effective (also after commission)</span><span class="result-row-value" id="rNERLL">—</span></div>
+            <div class="result-row" id="rNPVRow"><span class="result-row-label" id="rNPVLbl">NPV Net Effective Rent</span><span class="result-row-value" id="rNPV">—</span></div>
+            <div style="font-size:11px;color:#888;margin-top:4px">Per SF per year over the full term. Straight-line unless marked NPV.</div>
+            <div id="occResults" style="display:none;margin-top:14px">
+              <div class="section-title">Occupancy Cost (base rent + NNN)</div>
+              <div class="result-row"><span class="result-row-label">Year 1 Monthly (rent + NNN)</span><span class="result-row-value" id="rOccMo">—</span></div>
+              <div class="result-row"><span class="result-row-label">Year 1 Gross PSF</span><span class="result-row-value" id="rOccPsf">—</span></div>
+              <div class="result-row"><span class="result-row-label">Total Occupancy Cost over Term</span><span class="result-row-value" id="rOccTotal">—</span></div>
+              <div style="font-size:11px;color:#888;margin-top:4px">NNN held at the year 1 rate for the whole term.</div>
+            </div>
           </div>
           <div id="saleResultDetails" style="display:none">
             <div class="result-row"><span class="result-row-label">Sale Price</span><span class="result-row-value" id="rSalePrice">—</span></div>
@@ -1011,6 +1069,16 @@ input[type=range] {
 
           <button class="save-btn-full" id="saveCommBtn" onclick="saveCommission()" disabled>⬆ Save to HubSpot Deal</button>
           <div class="save-status" id="saveCommStatus"></div>
+          <div style="margin-top:16px;border-top:1px solid #ddd;padding-top:12px">
+            <div class="section-title">Send to Accounting</div>
+            <div class="field-grp"><div class="field-lbl">To</div><input type="email" id="acctEmail" value="Renee.Chastain@jll.com"/></div>
+            <div class="field-grp"><div class="field-lbl">CC</div><input type="email" id="acctCc" value="Andrew.Agyemang@jll.com"/></div>
+            <div class="btn-row" style="display:flex;gap:8px">
+              <button class="btn btn-success" onclick="emailAccounting()">✉ Email Invoice Request</button>
+              <button class="btn btn-outline" onclick="copyAccountingSummary()">Copy Summary</button>
+            </div>
+            <div class="save-status" id="acctStatus"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1256,13 +1324,25 @@ var PIPELINE_SIDE = {
 // Rent schedule with yearly escalations, the way the commission worksheet is built:
 // rent steps up each lease year from commencement, free rent comes off the front of the
 // term, and commission is paid on the rent actually collected (net lease value).
+// Lease dates from the commencement date: expiration is the day before the anniversary
+// of the full term (1/1/2027 + 62 months = 2/29/2032); rent starts after front-loaded free rent.
+var currentLeaseDates = null;
+var currentLease = null;
+function addMonthsYMD(ymd, monthsOut, dayBefore){
+  var p=ymd.split('-'); var lastDay=new Date(Date.UTC(+p[0], +p[1]+monthsOut, 0)).getUTCDate();
+  // a start on the 29th-31st lands on the last day of a shorter month, not in the next month
+  var dt=(+p[2]>lastDay) ? new Date(Date.UTC(+p[0], +p[1]+monthsOut, 1)) : new Date(Date.UTC(+p[0], +p[1]-1+monthsOut, +p[2]));
+  if(dayBefore) dt=new Date(dt.getTime()-86400000);
+  return dt.getUTCFullYear()+'-'+String(dt.getUTCMonth()+1).padStart(2,'0')+'-'+String(dt.getUTCDate()).padStart(2,'0');
+}
+function prettyYMD(ymd){ var p=ymd.split('-'); return (+p[1])+'/'+(+p[2])+'/'+p[0]; }
 // Label a schedule row with real dates when a lease start date is entered
-function periodLabel(r){
-  var v=el('leaseStart').value; if(!v) return r.year;
-  var p=v.split('-'), y=+p[0], m=+p[1]-1, d=+p[2];
-  function at(monthsOut, dayBefore){ var dt=new Date(Date.UTC(y, m+monthsOut, d)); if(dayBefore) dt=new Date(dt.getTime()-86400000); return (dt.getUTCMonth()+1)+'/'+dt.getUTCDate()+'/'+String(dt.getUTCFullYear()).slice(2); }
-  var first=(r.year-1)*12;
-  return at(first,false)+'–'+at(first+r.months,true);
+function periodLabel(r, yearly){
+  var v=el('leaseStart').value;
+  if(!v) return yearly ? r.year : ('Mo '+r.firstMonth+'–'+(r.firstMonth+r.months-1));
+  var first=r.firstMonth-1;
+  var a=addMonthsYMD(v,first,false).split('-'), b=addMonthsYMD(v,first+r.months,true).split('-');
+  return (+a[1])+'/'+(+a[2])+'/'+a[0].slice(2)+'–'+(+b[1])+'/'+(+b[2])+'/'+b[0].slice(2);
 }
 function onFreeTimingChange(){
   var custom = el('freeTiming').value==='custom';
@@ -1292,20 +1372,38 @@ function freeMonthSet(term, freeMonths, timing, customText){
   }
   return set;
 }
-function buildRentSchedule(sf, psf, termMonths, freeMonths, escPct, timing, customText){
-  var rows=[], net=0, freeVal=0, term=Math.max(0,Math.round(termMonths));
-  var freeSet=freeMonthSet(term, freeMonths, timing||'start', customText);
-  var years=Math.ceil(term/12);
-  for(var y=0;y<years;y++){
-    var monthly=Math.round(sf*psf/12*Math.pow(1+escPct/100,y)*100)/100;
-    var first=y*12+1, last=Math.min(term,(y+1)*12), months=last-first+1, abated=0;
-    for(var m=first;m<=last;m++){ if(freeSet[m]) abated++; }
-    var paid=months-abated;
-    var rent=Math.round(monthly*paid*100)/100;
-    net+=rent; freeVal+=monthly*abated;
-    rows.push({year:y+1,months:months,abated:abated,paid:paid,monthly:monthly,psf:sf?monthly*12/sf:0,rent:rent});
+function onLeaseOptionChange(){
+  el('escFreqMonths').style.display = el('escFreq').value==='Other' ? 'block' : 'none';
+  el('freePartialWrap').style.display = el('freeType').value==='Partial' ? 'flex' : 'none';
+  calcCommission();
+}
+function parseNumList(text){
+  return (text||'').split(/[,;\n]+/).map(function(x){ return parseFloat(x.replace(/[$\s]/g,'').replace(/,(?=\d{3})/g,'')); }).filter(function(n){ return !isNaN(n) && n>0; });
+}
+// o: {sf, psf, term, free, esc, timing, customText, stepMonths, steps (monthly $ per step), partialPct (0-100 abated)}
+function buildRentSchedule(o){
+  var sf=o.sf, term=Math.max(0,Math.round(o.term)), stepMonths=Math.max(1,Math.round(o.stepMonths||12));
+  var steps=o.steps||[], abatedShare=(o.partialPct===undefined||o.partialPct===null)?1:Math.min(1,Math.max(0,o.partialPct/100));
+  var freeSet=freeMonthSet(term, o.free, o.timing||'start', o.customText);
+  function stepRent(k){
+    if(k<steps.length) return Math.round(steps[k]*100)/100;
+    if(steps.length) return Math.round(steps[steps.length-1]*Math.pow(1+o.esc/100,k-steps.length+1)*100)/100;
+    return Math.round(sf*o.psf/12*Math.pow(1+o.esc/100,k)*100)/100;
   }
-  return {rows:rows, net:net, freeValue:freeVal, tlv:net+freeVal, freeCount:Object.keys(freeSet).length};
+  var rows=[], flows=[], net=0, freeVal=0, cur=null;
+  for(var m=1;m<=term;m++){
+    var y=Math.floor((m-1)/12), k=Math.floor((m-1)/stepMonths), monthly=stepRent(k);
+    var isFree=!!freeSet[m], paidAmt=isFree ? monthly*(1-abatedShare) : monthly;
+    if(!cur || cur.yearIdx!==y || cur.stepIdx!==k){
+      cur={yearIdx:y, stepIdx:k, year:y+1, firstMonth:m, months:0, abated:0, paid:0, monthly:monthly, psf:sf?monthly*12/sf:0, rent:0};
+      rows.push(cur);
+    }
+    cur.months++; if(isFree) cur.abated++; else cur.paid++;
+    cur.rent+=paidAmt; net+=paidAmt; freeVal+=monthly-paidAmt; flows.push({rent:paidAmt, free:isFree});
+  }
+  rows.forEach(function(r){ r.rent=Math.round(r.rent*100)/100; });
+  net=Math.round(net*100)/100;
+  return {rows:rows, flows:flows, net:net, freeValue:freeVal, tlv:net+freeVal, freeCount:Object.keys(freeSet).length, year1Monthly:term?stepRent(0):0, yearly:stepMonths%12===0};
 }
 // Internal key used for default rates and lease/sale layout
 function dealKey(){
@@ -1369,6 +1467,29 @@ async function hsPatch(dealId, body){
   return r;
 }
 
+// Save to HubSpot, and if HubSpot rejects individual properties (not created yet, or a value it
+// won't accept) drop just those and save the rest, so one bad field never blocks the whole save.
+async function hsPatchSafe(dealId, props){
+  var skipped=[], send=Object.assign({},props);
+  for(var attempt=0; attempt<4; attempt++){
+    var r=await hsPatch(dealId,{properties:send});
+    if(r.ok) return {ok:true, skipped:skipped, saved:Object.keys(send).length};
+    var err=await r.json().catch(function(){ return {}; });
+    var msg=err.message||err.error||'Could not save', bad=[];
+    try{ var m=msg.match(/\[\{.*\}\]/); if(m) bad=JSON.parse(m[0]).filter(function(x){ return x.name && (x.name in send); }); }catch(_){}
+    if(!bad.length) return {ok:false, skipped:skipped, error:msg};
+    bad.forEach(function(x){ skipped.push({name:x.name, why:x.error==='PROPERTY_DOESNT_EXIST'?'not set up in HubSpot yet':(x.message||'rejected')}); delete send[x.name]; });
+    if(!Object.keys(send).length) return {ok:false, skipped:skipped, error:'HubSpot rejected every field'};
+  }
+  return {ok:false, skipped:skipped, error:'Could not save'};
+}
+function skippedNote(sk){
+  if(!sk||!sk.length) return '';
+  var missing=sk.filter(function(x){return x.why==='not set up in HubSpot yet';}).map(function(x){return x.name;});
+  var other=sk.filter(function(x){return x.why!=='not set up in HubSpot yet';}).map(function(x){return x.name;});
+  return (missing.length?' Not saved (property not in HubSpot yet): '+missing.join(', ')+'.':'')+(other.length?' Skipped (HubSpot rejected the value): '+other.join(', ')+'.':'');
+}
+
 // ── GLOBAL DEAL LOAD ──────────────────────────────────────────────────────────
 async function loadGlobalDeal(){
   var dealId = el('globalDealId').value.trim();
@@ -1376,9 +1497,8 @@ async function loadGlobalDeal(){
   currentDealId = dealId;
 
   // Keep props list lean to avoid URL length limits
-  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split,rent_escalation';
+  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split,rent_escalation,lease_commencement_date,lease_expiration,rentable_sf,base_rent_year_1_psf,base_rent_year_1_monthly,free_rent_months,lease_type,purchase_price,ti_allowances_psf,ti_allowance_total,escalation_frequency,escalation_frequency_months,free_rent_type,free_rent_partial_percent,free_rent_timing,free_rent_custom_months,custom_rent_steps,nnn_expenses_psf,moving_allowance,landlord_work_cost,other_concessions,effective_rent_discount_rate,lease_term_months,ownerlandlord_legal_entity,ownerlandlord_contact_name,ownerlandlord_contact_email,tenant_legal_entity,property_address,building_name,suiteunit_number';
   // Trim to safe URL length if needed
-  if(propsToFetch.length > 2000) propsToFetch = propsToFetch.substring(0, 2000);
   try{
     var r = await hsGet(dealId, propsToFetch);
     if(!r.ok){ alert('Deal not found — check the ID'); return; }
@@ -1442,7 +1562,44 @@ function populateCalculatorFromDeal(p){
   if(refPctLoaded!==null){ if(refKey==='inbound') el('inboundSplit').value=refPctLoaded; else if(refKey!=='none') el('referralFee').value=refPctLoaded; }
   if(p.commission_rate) el('commRate').value=pctFromHs(p.commission_rate,0.25);
   if(p.jll_split) el('jllSplit').value=pctFromHs(p.jll_split,1);
+  if(p.lease_commencement_date) el('leaseStart').value=/^\d{4}-\d{2}-\d{2}/.test(p.lease_commencement_date)?p.lease_commencement_date.slice(0,10):tsToDate(p.lease_commencement_date);
+  function ymdOf(v){ return v ? (/^\d{4}-\d{2}-\d{2}/.test(v)?v.slice(0,10):tsToDate(v)) : ''; }
+  if(parseFloat(p.rentable_sf)>0) el('sqft').value=parseFloat(p.rentable_sf);
+  // Prefer the monthly rent (what the lease states); fall back to the PSF rate
+  if(parseFloat(p.base_rent_year_1_monthly)>0){ el('rentBasis').value='monthly'; el('psfRate').value=parseFloat(p.base_rent_year_1_monthly); }
+  else if(parseFloat(p.base_rent_year_1_psf)>0){ el('rentBasis').value='psf'; el('psfRate').value=parseFloat(p.base_rent_year_1_psf); }
+  if(p.free_rent_months!==undefined && p.free_rent_months!==null && p.free_rent_months!=='') el('freeRent').value=parseFloat(p.free_rent_months)||0;
+  if(parseFloat(p.ti_allowances_psf)>0){ el('tiBasis').value='psf'; el('tiAllowance').value=parseFloat(p.ti_allowances_psf); }
+  else if(parseFloat(p.ti_allowance_total)>0){ el('tiBasis').value='total'; el('tiAllowance').value=parseFloat(p.ti_allowance_total); }
+  if(parseFloat(p.purchase_price)>0) el('salePrice').value=parseFloat(p.purchase_price);
+  if(p.lease_type){ document.querySelectorAll('#leaseCalcFields .tog-btn[onclick*="setLeaseType"]').forEach(function(b){ b.classList.toggle('on', b.textContent.trim()===p.lease_type); }); }
+  // HubSpot has no "term in months" property, so the term is read back from the two dates
+  var cY=ymdOf(p.lease_commencement_date), eY=ymdOf(p.lease_expiration);
+  if(cY && eY){
+    var c=cY.split('-'), e=addMonthsYMD(eY,0,false).split('-');
+    var ePlus=new Date(Date.UTC(+e[0],+e[1]-1,+e[2])+86400000);
+    var months=(ePlus.getUTCFullYear()-(+c[0]))*12+(ePlus.getUTCMonth()-(+c[1]-1));
+    if(months>0){ el('termMonths').value=months; el('termMode').value='included'; }
+  }
+  if(parseFloat(p.lease_term_months)>0){ el('termMonths').value=parseFloat(p.lease_term_months); el('termMode').value='included'; }
   var escLoaded=pctFromHs(p.rent_escalation,0.25); if(escLoaded) el('escalation').value=escLoaded;
+  if(p.escalation_frequency && ['Annual','Every 2 Years','Other'].includes(p.escalation_frequency)) el('escFreq').value=p.escalation_frequency;
+  if(parseFloat(p.escalation_frequency_months)>0) el('escFreqMonths').value=parseFloat(p.escalation_frequency_months);
+  if(p.free_rent_type && ['Full','Partial','Base Only'].includes(p.free_rent_type)) el('freeType').value=p.free_rent_type;
+  var partLoaded=pctFromHs(p.free_rent_partial_percent,1); if(partLoaded) el('freePartialPct').value=partLoaded;
+  var timingKey={'Beginning of Term':'start','Spread':'spread','End of Term':'end','Custom':'custom'}[p.free_rent_timing];
+  if(timingKey) el('freeTiming').value=timingKey;
+  if(p.free_rent_custom_months) el('freeCustom').value=p.free_rent_custom_months;
+  if(p.custom_rent_steps) el('rentSteps').value=p.custom_rent_steps;
+  if(parseFloat(p.nnn_expenses_psf)>0) el('nnnPsf').value=parseFloat(p.nnn_expenses_psf);
+  if(parseFloat(p.moving_allowance)>0) el('moveAllow').value=parseFloat(p.moving_allowance);
+  if(parseFloat(p.landlord_work_cost)>0) el('llWork').value=parseFloat(p.landlord_work_cost);
+  if(parseFloat(p.other_concessions)>0) el('otherConc').value=parseFloat(p.other_concessions);
+  var discLoaded=pctFromHs(p.effective_rent_discount_rate,0.5); if(discLoaded) el('discRate').value=discLoaded;
+  el('escFreqMonths').style.display = el('escFreq').value==='Other' ? 'block' : 'none';
+  el('freePartialWrap').style.display = el('freeType').value==='Partial' ? 'flex' : 'none';
+  el('freeCustom').style.display = el('freeTiming').value==='custom' ? 'block' : 'none';
+  el('freeRent').disabled = el('freeTiming').value==='custom';
   if(p.commission_status) el('commissionStatus').value=p.commission_status;
   if(p.date_invoiced) el('dateInvoiced').value=tsToDate(p.date_invoiced);
   if(p.date_commission_received) el('dateReceived').value=tsToDate(p.date_commission_received);
@@ -1516,28 +1673,88 @@ function calcCommission(){
   } else {
     var sf = parseFloat(el('sqft').value)||0;
     var rentIn = parseFloat(el('psfRate').value)||0;
+    var monthlyBasis = el('rentBasis').value==='monthly';
     // Rent can be typed the way the lease states it: $/SF/year or the year 1 monthly base rent
-    var psf = (el('rentBasis').value==='monthly') ? (sf ? rentIn*12/sf : 0) : rentIn;
+    var psf = monthlyBasis ? (sf ? rentIn*12/sf : 0) : rentIn;
+    // Custom rent steps are typed in the same units as the rent box, then held as monthly dollars
+    var stepsIn = parseNumList(el('rentSteps').value);
+    var steps = stepsIn.map(function(v){ return monthlyBasis ? v : v*sf/12; });
+    if(steps.length && sf) psf = steps[0]*12/sf;
     var term = parseFloat(el('termMonths').value)||60;
     var free = parseFloat(el('freeRent').value)||0;
     if(el('termMode').value==='added' && el('freeTiming').value!=='custom') term += Math.max(0,Math.round(free));
-    var annual = sf*psf;
     var esc = parseFloat(el('escalation').value)||0;
     var timing = el('freeTiming').value;
-    var sched = buildRentSchedule(sf, psf, term, free, esc, timing, el('freeCustom').value);
+    var freq = el('escFreq').value;
+    var stepMonths = freq==='Every 2 Years' ? 24 : (freq==='Other' ? (parseFloat(el('escFreqMonths').value)||12) : 12);
+    var freeType = el('freeType').value;
+    var partialPct = freeType==='Partial' ? numOr(el('freePartialPct').value,50) : 100;
+    var sched = buildRentSchedule({sf:sf, psf:psf, term:term, free:free, esc:esc, timing:timing, customText:el('freeCustom').value, stepMonths:stepMonths, steps:steps, partialPct:partialPct});
     free = sched.freeCount;
+    var annual = sched.year1Monthly*12;
     transValue = sched.net;
-    el('rEsc').textContent = esc ? esc+'% per year' : 'None (flat)';
+    gross = transValue*(rate/100);
+
+    // Concessions and effective rent
+    var tiIn = parseFloat(el('tiAllowance').value)||0;
+    var tiTotal = (el('tiBasis').value==='total') ? tiIn : tiIn*sf;
+    var tiPsf = sf ? tiTotal/sf : 0;
+    var moveAllow = parseFloat(el('moveAllow').value)||0, llWork = parseFloat(el('llWork').value)||0, otherConc = parseFloat(el('otherConc').value)||0;
+    var otherTotal = moveAllow+llWork+otherConc, concessions = tiTotal+otherTotal;
+    var yrs = term/12, effOk = sf>0 && psf>0 && yrs>0;
+    var eff = { avg:null, ner:null, nerLL:null, npv:null, disc:null, occTotal:null };
+    var nnnPsf = parseFloat(el('nnnPsf').value)||0;
+    el('effectiveResults').style.display = effOk ? 'block' : 'none';
+    if(effOk){
+      var p2=function(n){ return '$'+n.toFixed(2)+' PSF/yr'; };
+      eff.avg = sched.net/sf/yrs;
+      eff.ner = (sched.net-concessions)/sf/yrs;
+      eff.nerLL = (sched.net-concessions-gross)/sf/yrs;
+      el('rTI').textContent = tiTotal ? fmt(tiTotal)+' ($'+tiPsf.toFixed(2)+' PSF)' : 'None';
+      el('rConcRow').style.display = otherTotal ? '' : 'none';
+      el('rConc').textContent = fmt(otherTotal);
+      el('rAvgRent').textContent = p2(eff.avg);
+      el('rNER').textContent = p2(eff.ner);
+      el('rNERLL').textContent = p2(eff.nerLL);
+      // NPV version: rent paid monthly in advance, concessions paid up front, restated as a level rent
+      var disc = parseFloat(el('discRate').value);
+      if(!isNaN(disc) && disc>=0){
+        var rM=disc/100/12, pv=0, ann=0;
+        sched.flows.forEach(function(f,idx){ var d=Math.pow(1+rM,idx); pv+=f.rent/d; ann+=1/d; });
+        eff.npv = (pv-concessions)/ann*12/sf; eff.disc = disc;
+        el('rNPVRow').style.display=''; el('rNPVLbl').textContent='NPV Net Effective Rent ('+disc+'% discount)'; el('rNPV').textContent=p2(eff.npv);
+      } else { el('rNPVRow').style.display='none'; }
+      // Occupancy cost: NNN at the year 1 rate; abated in free months only when free rent type is Full
+      el('occResults').style.display = nnnPsf>0 ? 'block' : 'none';
+      if(nnnPsf>0){
+        var nnnMo=nnnPsf*sf/12, nnnTotal=0;
+        sched.flows.forEach(function(f){ if(!(f.free && freeType==='Full')) nnnTotal+=nnnMo; });
+        eff.occTotal = sched.net+nnnTotal;
+        el('rOccMo').textContent = fmt(sched.year1Monthly+nnnMo);
+        el('rOccPsf').textContent = '$'+(psf+nnnPsf).toFixed(2)+' PSF/yr';
+        el('rOccTotal').textContent = fmt(eff.occTotal);
+      }
+    }
+    currentLease = { sf:sf, psf:psf, monthly:sched.year1Monthly, free:free, term:Math.round(term), esc:esc, freq:freq, stepMonths:stepMonths,
+      freeType:freeType, partialPct:partialPct, timing:timing, customMonths:el('freeCustom').value, stepsText:stepsIn.join(', '), hasSteps:steps.length>0,
+      tiTotal:tiTotal, tiPsf:tiPsf, moveAllow:moveAllow, llWork:llWork, otherConc:otherConc, nnnPsf:nnnPsf,
+      net:sched.net, freeValue:sched.freeValue, tlv:sched.tlv, eff:eff, rows:sched.rows, yearly:sched.yearly };
+    var startYMD = el('leaseStart').value;
+    if(startYMD && term>0){
+      currentLeaseDates = { start:startYMD, expiration:addMonthsYMD(startYMD, Math.round(term), true),
+        rentStart:(timing==='start' && partialPct>=100) ? addMonthsYMD(startYMD, free, false) : null };
+      el('rExpire').textContent = prettyYMD(currentLeaseDates.expiration);
+    } else { currentLeaseDates = null; el('rExpire').textContent = startYMD ? '—' : 'Enter commencement date'; }
+    el('rEsc').textContent = steps.length ? 'Custom rent steps'+(esc?' then '+esc+'%':'') : (esc ? esc+'% '+(stepMonths===12?'per year':'every '+stepMonths+' months') : 'None (flat)');
     el('rFreeVal').textContent = sched.freeValue ? fmt(sched.freeValue) : '—';
     el('rTLV').textContent = fmt(sched.tlv);
-    el('rSchedule').innerHTML = (sf&&psf) ? '<table style="width:100%;border-collapse:collapse"><tr style="text-align:right;color:#888"><td style="text-align:left">'+(el('leaseStart').value?'Period':'Yr')+'</td><td>Paid mo</td><td>Monthly</td><td>PSF</td><td>Rent</td></tr>'+
-      sched.rows.map(function(r){ return '<tr style="text-align:right;border-top:1px solid #e5e5e5"><td style="text-align:left;padding:3px 0">'+periodLabel(r)+'</td><td>'+r.paid+(r.abated?' (+'+r.abated+' free)':'')+'</td><td>$'+r.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>$'+r.psf.toFixed(2)+'</td><td>'+fmt(r.rent)+'</td></tr>'; }).join('')+'</table>' : '';
-    gross = transValue*(rate/100);
+    el('rSchedule').innerHTML = (sf&&psf) ? '<table style="width:100%;border-collapse:collapse"><tr style="text-align:right;color:#888"><td style="text-align:left">'+(el('leaseStart').value?'Period':(sched.yearly?'Yr':'Months'))+'</td><td>Paid mo</td><td>Monthly</td><td>PSF</td><td>Rent</td></tr>'+
+      sched.rows.map(function(r){ return '<tr style="text-align:right;border-top:1px solid #e5e5e5"><td style="text-align:left;padding:3px 0">'+periodLabel(r, sched.yearly)+'</td><td>'+r.paid+(r.abated?' (+'+r.abated+(partialPct<100?' partial':' free')+')':'')+'</td><td>$'+r.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>$'+r.psf.toFixed(2)+'</td><td>'+fmt(r.rent)+'</td></tr>'; }).join('')+'</table>' : '';
     el('rSF').textContent = sf?sf.toLocaleString()+' SF':'—';
     el('rPSF').textContent = psf?'$'+psf.toFixed(2)+' PSF':'—';
     el('rAnnual').textContent = fmt(annual);
     el('rTerm').textContent = term?term+' mo ('+(term/12).toFixed(1)+' yrs)':'—';
-    el('rFreeRent').textContent = free?free+' months':'None';
+    el('rFreeRent').textContent = free?free+' months'+(partialPct<100?' at '+partialPct+'% abated':''):'None';
     el('rTotal').textContent = fmt(transValue);
   }
 
@@ -1648,8 +1865,52 @@ async function saveCommission(){
     [PROPS.commissionNotes]: el('commissionNotes').value||'',
     'amount': Math.round(currentYourNet).toString()
   };
+  if(currentLeaseDates && !['seller','buyer','dual_sale'].includes(t)){
+    props['lease_commencement_date']=currentLeaseDates.start;
+    props['lease_expiration']=currentLeaseDates.expiration;
+    if(currentLeaseDates.rentStart) props['rent_commencement_date']=currentLeaseDates.rentStart;
+  }
+  var isSaleSave=['seller','buyer','dual_sale'].includes(t);
+  if(!isSaleSave && currentLease && currentLease.sf>0 && currentLease.psf>0){
+    props['rentable_sf']=currentLease.sf.toString();
+    props['base_rent_year_1_psf']=(Math.round(currentLease.psf*100)/100).toString();
+    props['base_rent_year_1_monthly']=currentLease.monthly.toString();
+    props['base_rent_year_1_annual']=(Math.round(currentLease.monthly*12*100)/100).toString();
+    props['free_rent_months']=currentLease.free.toString();
+    if(el('tiAllowance').value!==''){ props['ti_allowances_psf']=(Math.round(currentLease.tiPsf*100)/100).toString(); props['ti_allowance_total']=Math.round(currentLease.tiTotal).toString(); }
+    var L=currentLease, r2=function(n){ return (Math.round(n*100)/100).toString(); };
+    props['lease_term_months']=L.term.toString();
+    props['total_lease_value']=Math.round(L.tlv).toString();
+    props['free_rent_value']=Math.round(L.freeValue).toString();
+    if(L.free>0){
+      props['free_rent_type']=L.freeType;
+      props['free_rent_timing']={start:'Beginning of Term',spread:'Spread',end:'End of Term',custom:'Custom'}[L.timing];
+      props['free_rent_custom_months']=L.timing==='custom'?L.customMonths:'';
+      if(L.freeType==='Partial') props['free_rent_partial_percent']=pctToHs(L.partialPct);
+    }
+    if(L.esc>0 || L.hasSteps){
+      props['escalation_frequency']=L.freq;
+      if(L.freq==='Other') props['escalation_frequency_months']=L.stepMonths.toString();
+    }
+    props['custom_rent_steps']=L.stepsText;
+    if(el('nnnPsf').value!=='') props['nnn_expenses_psf']=r2(L.nnnPsf);
+    if(el('moveAllow').value!=='') props['moving_allowance']=Math.round(L.moveAllow).toString();
+    if(el('llWork').value!=='') props['landlord_work_cost']=Math.round(L.llWork).toString();
+    if(el('otherConc').value!=='') props['other_concessions']=Math.round(L.otherConc).toString();
+    if(L.eff.avg!==null){
+      props['average_rent_psf']=r2(L.eff.avg);
+      props['net_effective_rent_psf']=r2(L.eff.ner);
+      props['landlord_net_effective_rent_psf']=r2(L.eff.nerLL);
+      if(L.eff.npv!==null){ props['npv_net_effective_rent_psf']=r2(L.eff.npv); props['effective_rent_discount_rate']=pctToHs(L.eff.disc); }
+      if(L.eff.occTotal!==null) props['total_occupancy_cost']=Math.round(L.eff.occTotal).toString();
+    }
+    var ltBtn=document.querySelector('#leaseCalcFields .tog-btn.on[onclick*="setLeaseType"]');
+    if(ltBtn) props['lease_type']=ltBtn.textContent.trim();
+  }
+  if(isSaleSave && parseFloat(el('salePrice').value)>0) props['purchase_price']=Math.round(parseFloat(el('salePrice').value)).toString();
   var escSave=parseFloat(el('escalation').value)||0;
-  if(escSave>0 && !['seller','buyer','dual_sale'].includes(t)){ props['rent_escalation']=pctToHs(escSave); props['rent_escalation_type']='Fixed %'; }
+  if(escSave>0 && !isSaleSave){ props['rent_escalation']=pctToHs(escSave); props['rent_escalation_type']='Fixed %'; }
+  else if(!isSaleSave && currentLease && currentLease.hasSteps){ props['rent_escalation_type']='Flat Amount'; }
   if(!(currentTransValue>0)){
     ['transaction_value','gross_commission','referral_fee_amount','your_net_commission','cobroker_one_amount','cobroker_two_amount','cobroker_three_amount','your_share_before_jll','amount'].forEach(function(k){ delete props[k]; });
   }
@@ -1658,12 +1919,81 @@ async function saveCommission(){
   if(dr) props[PROPS.dateReceived]=dr.toString();
 
   try{
-    var r=await hsPatch(currentDealId,{properties:props});
-    if(!r.ok){ var err=await r.json(); var why=(err.message||'Could not save'); try{ var m=why.match(/\[\{.*\}\]/); if(m){ why=JSON.parse(m[0]).map(function(x){return x.name+': '+x.message;}).join(' | '); } }catch(_){} el('saveCommStatus').textContent='Not saved — '+why; el('saveCommStatus').className='save-status err'; }
-    else { el('saveCommStatus').textContent=(currentTransValue>0)?'✓ Saved to HubSpot — commission details updated on deal record. Refresh HubSpot to see changes.':'✓ Saved rates, splits and status. Dollar amounts on the deal were left as they are because no rent or sale price is entered here.'; el('saveCommStatus').className='save-status ok'; }
+    var res=await hsPatchSafe(currentDealId,props);
+    if(!res.ok){ el('saveCommStatus').textContent='Not saved — '+res.error+skippedNote(res.skipped); el('saveCommStatus').className='save-status err'; }
+    else {
+      el('saveCommStatus').textContent=((currentTransValue>0)?'✓ Saved to HubSpot — '+res.saved+' fields updated on the deal.':'✓ Saved rates, splits and status. Dollar amounts on the deal were left as they are because no rent or sale price is entered here.')+skippedNote(res.skipped);
+      el('saveCommStatus').className='save-status ok';
+      Object.keys(props).forEach(function(k){ if(currentDealData && !res.skipped.some(function(x){return x.name===k;})) currentDealData[k]=props[k]; });
+    }
   }catch(e){ el('saveCommStatus').textContent='Connection error'; el('saveCommStatus').className='save-status err'; }
   el('saveCommBtn').disabled=false;
 }
+
+// ── SEND TO ACCOUNTING ────────────────────────────────────────────────────────
+function buildAccountingSummary(includeSchedule){
+  var d=currentDealData||{}, t=dealKey(), isSale=['seller','buyer','dual_sale'].includes(t), L=currentLease, tx=function(id){ return el(id).textContent; };
+  var lines=[], add=function(label,val){ if(val!==undefined&&val!==null&&val!==''&&val!=='—') lines.push(label+': '+val); };
+  lines.push('COMMISSION INVOICE REQUEST'); lines.push('');
+  add('Deal', (d.dealname||'')+(currentDealId?' (HubSpot ID '+currentDealId+')':''));
+  add('Property', [d.building_name,d.property_address,d.suiteunit_number?('Suite '+d.suiteunit_number):''].filter(Boolean).join(', '));
+  add('Tenant', d.tenant_legal_entity);
+  add('Bill to (Owner/Landlord)', d.ownerlandlord_legal_entity);
+  add('Owner/Landlord contact', [d.ownerlandlord_contact_name,d.ownerlandlord_contact_email].filter(Boolean).join(', '));
+  add('Deal type', el('dealSide').options[el('dealSide').selectedIndex].text+' — '+el('dealType').value);
+  lines.push('');
+  if(isSale){ add('Sale price', tx('rSalePrice')); }
+  else if(L && L.sf>0 && L.psf>0){
+    add('Square footage', L.sf.toLocaleString()+' SF');
+    if(currentLeaseDates){ add('Lease commencement', prettyYMD(currentLeaseDates.start)); add('Lease expiration', prettyYMD(currentLeaseDates.expiration)); }
+    add('Term', L.term+' months');
+    add('Year 1 base rent', '$'+L.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'/month ($'+L.psf.toFixed(2)+' PSF/yr)');
+    add('Escalation', tx('rEsc'));
+    add('Free rent', tx('rFreeRent')+(L.free?' ('+el('freeTiming').options[el('freeTiming').selectedIndex].text+')':''));
+    if(includeSchedule){
+      lines.push(''); lines.push('Rent schedule:');
+      L.rows.forEach(function(r){ lines.push('  '+periodLabel(r,L.yearly)+(el('leaseStart').value?'':(L.yearly?' (year)':''))+': '+r.paid+' mo x $'+r.monthly.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+(r.abated?' ('+r.abated+' abated)':'')+' = '+fmt(r.rent)); });
+    }
+    lines.push('');
+    add('Free rent value', tx('rFreeVal'));
+    add('Total lease value', tx('rTLV'));
+    add('Net lease value (commission base)', tx('rTotal'));
+  }
+  add('Commission rate', tx('rCommRate'));
+  add('GROSS COMMISSION DUE', tx('rGross'));
+  lines.push('');
+  if(currentReferral==='inbound') add(tx('rInboundLbl'), tx('rInbound')+' — '+[el('refBrokerName').value,el('refBrokerCompany').value].filter(Boolean).join(', '));
+  else if(currentReferral!=='none') add(tx('rReferralLbl'), tx('rReferral')+' — '+[el('refBrokerName').value,el('refBrokerCompany').value].filter(Boolean).join(', '));
+  [1,2,3].forEach(function(i){ if((parseFloat(el('cb'+i+'Split').value)||0)>0) add('Co-broker '+[el('cb'+i+'Name').value,el('cb'+i+'Company').value].filter(Boolean).join(', ')+' ('+el('cb'+i+'Split').value+'%)', tx('rCb'+i).replace(/[()]/g,'')); });
+  add('Commission status', el('commissionStatus').value);
+  add('Notes', el('commissionNotes').value);
+  return lines.join('\n');
+}
+function acctReady(){
+  if(!(currentTransValue>0)){ el('acctStatus').textContent='Enter the deal economics first so there is a commission to invoice.'; el('acctStatus').className='save-status err'; return false; }
+  return true;
+}
+async function copyAccountingSummary(){
+  if(!acctReady()) return false;
+  try{ await navigator.clipboard.writeText(buildAccountingSummary(true)); el('acctStatus').textContent='✓ Summary copied — paste it anywhere.'; el('acctStatus').className='save-status ok'; return true; }
+  catch(e){ el('acctStatus').textContent='Could not copy automatically.'; el('acctStatus').className='save-status err'; return false; }
+}
+function emailAccounting(){
+  if(!acctReady()) return;
+  var to=el('acctEmail').value.trim();
+  if(!/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+([,;]\s*[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+)*$/.test(to)){ el('acctStatus').textContent='Enter the accounting email address first.'; el('acctStatus').className='save-status err'; return; }
+  var cc=el('acctCc').value.trim();
+  if(cc && !/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(cc)){ el('acctStatus').textContent='The CC address does not look right.'; el('acctStatus').className='save-status err'; return; }
+  try{ localStorage.setItem('acctEmail', to); localStorage.setItem('acctCc', cc); }catch(e){}
+  var subject='Commission invoice request — '+((currentDealData&&currentDealData.dealname)||'deal');
+  var body=buildAccountingSummary(true), note='';
+  // Mail apps cut off very long links, so drop the rent schedule from the email if needed (it is still copied)
+  if(encodeURIComponent(body).length>1700){ body=buildAccountingSummary(false); note=' The rent schedule was too long for the email link — it is on your clipboard, paste it in.'; }
+  try{ navigator.clipboard.writeText(buildAccountingSummary(true)); }catch(e){}
+  window.location.href='mailto:'+encodeURIComponent(to).replace(/%40/g,'@').replace(/%2C/g,',')+'?'+(cc?'cc='+encodeURIComponent(cc).replace(/%40/g,'@')+'&':'')+'subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  el('acctStatus').textContent='✓ Email opened in your mail app — review it and press send.'+note; el('acctStatus').className='save-status ok';
+}
+try{ window.addEventListener('DOMContentLoaded', function(){ var v=null; try{ v=localStorage.getItem('acctEmail'); }catch(e){} if(v && el('acctEmail')) el('acctEmail').value=v; var c=null; try{ c=localStorage.getItem('acctCc'); }catch(e){} if(c!==null && el('acctCc')) el('acctCc').value=c; }); }catch(e){}
 
 // ── DOCUMENT UTILITIES ───────────────────────────────────────────────────────
 
@@ -1861,8 +2191,22 @@ Extract ALL key details from this ${docType} document. Return ONLY valid JSON wi
   "legal_description": null,
   "parcel_number": null,
   "lot_size_acres": null,
-  "year_built_sale": null
+  "year_built_sale": null,
+  "lease_term_months": null,
+  "rent_steps_monthly": null,
+  "free_rent_month_numbers": null,
+  "moving_allowance": null
 }
+
+Formatting rules:
+- Dates as YYYY-MM-DD.
+- Dollar amounts, square feet, counts and months as plain numbers with no $ signs, commas or units.
+- Percentages as the number of percent (4 for 4%, 3.5 for 3.5%).
+- lease_term_months: the full term in months including any free rent period.
+- rent_steps_monthly: if the document has a base rent schedule, an array of the monthly base rent for each rent step in order (for example [10992.30, 11432.00, 11889.28]); otherwise null.
+- free_rent_month_numbers: an array of the lease month numbers that are abated, where 1 is the first month of the term (for example [1, 2]); null if there is no free rent.
+- escalation_frequency: "Annual", "Every 2 Years" or "Other".
+- free_rent_type: "Full" if base rent and operating expenses are both abated, "Base Only" if the tenant still pays operating expenses, "Partial" if only part of the base rent is abated.
 
 ${context ? 'Additional context: '+context : ''}${dealContext}
 
@@ -1872,7 +2216,7 @@ Return ONLY the JSON object, no other text.`;
     if(!abstractDocObject){ throw new Error('No document loaded — please upload a file first'); }
     var payload = {
       model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
+      max_tokens: 4000,
       messages: [{
         role: 'user',
         content: docToMessageContent(abstractDocObject, prompt)
@@ -1973,7 +2317,8 @@ function renderAbstractedFields(data){
     loan_amount:'Loan Amount', loan_type:'Loan Type', seller_entity:'Seller Entity',
     buyer_entity:'Buyer Entity', opposing_broker_sale:'Opposing Broker (Sale)',
     opposing_broker_company_sale:'Opposing Broker Co (Sale)', legal_description:'Legal Description',
-    parcel_number:'Parcel Number/APN', lot_size_acres:'Lot Size (acres)', year_built_sale:'Year Built (Sale)'
+    parcel_number:'Parcel Number/APN', lot_size_acres:'Lot Size (acres)', year_built_sale:'Year Built (Sale)',
+    lease_term_months:'Lease Term (months)', rent_steps_monthly:'Rent Steps (monthly)', free_rent_month_numbers:'Free Rent Months (lease month #)', moving_allowance:'Moving Allowance'
   };
 
   var found = Object.entries(data).filter(([k,v])=>v!==null&&v!==undefined&&v!=='');
@@ -1984,7 +2329,7 @@ function renderAbstractedFields(data){
   el('abstractedFields').innerHTML = '<div class="abstracted-fields">'+
     Object.entries(data).map(([k,v])=>{
       var lbl = labels[k]||k;
-      var val = v!==null&&v!==undefined&&v!=='' ? v.toString() : null;
+      var val = v!==null&&v!==undefined&&v!=='' ? (Array.isArray(v)?v.join(', '):v.toString()) : null;
       return '<div class="af-item"><div class="af-label">'+lbl+'</div>'+
         (val ? '<div class="af-value">'+val+'</div>' : '<div class="af-value empty">Not found</div>')+
         '</div>';
@@ -1992,6 +2337,55 @@ function renderAbstractedFields(data){
   '</div>';
 
   el('abstractSaveRow').style.display = currentDealId ? 'flex' : 'none';
+  var copied = applyAbstractToCalculator(data);
+  if(copied){ el('abstractSaveStatus').textContent='Lease terms copied to the Commission tab ('+copied+' fields) — check them there, then save.'; el('abstractSaveStatus').className='save-status ok'; }
+}
+
+// ── ABSTRACT → CALCULATOR, so nothing is typed twice ──────────────────────────
+function absNum(v){ if(v===null||v===undefined||v==='') return null; if(typeof v==='number') return v; var n=parseFloat(String(v).replace(/[$\s]/g,'').replace(/,(?=\d{3})/g,'')); return isNaN(n)?null:n; }
+function absYMD(v){
+  if(!v) return ''; var t=String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(t)) return t.slice(0,10);
+  var d=new Date(t); if(isNaN(d.getTime())) return '';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function applyAbstractToCalculator(d){
+  var n=0, set=function(id,val){ if(val===null||val===undefined||val==='') return; el(id).value=val; n++; };
+  var sf=absNum(d.rentable_sf); set('sqft', sf);
+  var steps=Array.isArray(d.rent_steps_monthly) ? d.rent_steps_monthly.map(absNum).filter(function(x){return x>0;}) : [];
+  var mo=absNum(d.base_rent_year1_monthly), psf=absNum(d.base_rent_year1_psf);
+  if(steps.length>1){ el('rentBasis').value='monthly'; set('psfRate', steps[0]); set('rentSteps', steps.join(', ')); }
+  else if(mo>0){ el('rentBasis').value='monthly'; set('psfRate', mo); }
+  else if(psf>0){ el('rentBasis').value='psf'; set('psfRate', psf); }
+  var esc=absNum(d.rent_escalation_pct); if(esc>0 && esc<0.25) esc=Math.round(esc*10000)/100; if(esc>0) set('escalation', esc);
+  if(d.escalation_frequency){ var f=String(d.escalation_frequency).toLowerCase(); set('escFreq', (f.indexOf('2')>=0||f.indexOf('two')>=0)?'Every 2 Years':((f.indexOf('annual')>=0||f.indexOf('year')>=0)?'Annual':'Other')); }
+  var free=absNum(d.free_rent_months); if(free!==null) set('freeRent', free);
+  if(d.free_rent_type){ var ft=String(d.free_rent_type).toLowerCase(); set('freeType', ft.indexOf('partial')>=0?'Partial':(ft.indexOf('base')>=0?'Base Only':'Full')); }
+  var fm=Array.isArray(d.free_rent_month_numbers) ? d.free_rent_month_numbers.map(absNum).filter(function(x){return x>=1;}) : [];
+  if(fm.length){
+    var atStart=fm.every(function(x,i){ return x===i+1; });
+    if(atStart){ el('freeTiming').value='start'; if(free===null) set('freeRent', fm.length); }
+    else { el('freeTiming').value='custom'; set('freeCustom', fm.join(', ')); }
+  }
+  var tiP=absNum(d.ti_allowance_psf), tiT=absNum(d.ti_allowance_total);
+  if(tiP>0){ el('tiBasis').value='psf'; set('tiAllowance', tiP); } else if(tiT>0){ el('tiBasis').value='total'; set('tiAllowance', tiT); }
+  var nnn=absNum(d.nnn_expenses_psf); if(nnn>0) set('nnnPsf', nnn);
+  var mv=absNum(d.moving_allowance); if(mv>0) set('moveAllow', mv);
+  var start=absYMD(d.lease_commencement_date), exp=absYMD(d.lease_expiration_date); set('leaseStart', start);
+  var term=absNum(d.lease_term_months);
+  if(!(term>0) && start && exp){ var c=start.split('-'), e=new Date(Date.UTC(+exp.slice(0,4),+exp.slice(5,7)-1,+exp.slice(8,10))+86400000); term=(e.getUTCFullYear()-(+c[0]))*12+(e.getUTCMonth()-(+c[1]-1)); }
+  if(term>0){ set('termMonths', term); el('termMode').value='included'; }
+  if(d.lease_type){ var lt=String(d.lease_type).toLowerCase(), ltv=(lt.indexOf('nnn')>=0||lt.indexOf('triple')>=0)?'NNN':(lt.indexOf('mod')>=0?'Modified Gross':(lt.indexOf('gross')>=0?'Gross':null));
+    if(ltv){ document.querySelectorAll('#leaseCalcFields .tog-btn[onclick*="setLeaseType"]').forEach(function(b){ b.classList.toggle('on', b.textContent.trim()===ltv); }); n++; } }
+  var pp=absNum(d.purchase_price); if(pp>0) set('salePrice', pp);
+  if(n){
+    el('escFreqMonths').style.display = el('escFreq').value==='Other' ? 'block' : 'none';
+    el('freePartialWrap').style.display = el('freeType').value==='Partial' ? 'flex' : 'none';
+    el('freeCustom').style.display = el('freeTiming').value==='custom' ? 'block' : 'none';
+    el('freeRent').disabled = el('freeTiming').value==='custom';
+    calcCommission();
+  }
+  return n;
 }
 
 async function pushAbstractedToHubspot(){
@@ -2114,7 +2508,9 @@ async function pushAbstractedToHubspot(){
     legal_description:              'legal_description',
     parcel_number:                  'parcel_numberapn',
     lot_size_acres:                 'lot_size_acres',
-    year_built_sale:                'year_built_sale'
+    year_built_sale:                'year_built_sale',
+    lease_term_months:              'lease_term_months',
+    moving_allowance:               'moving_allowance'
   };
 
   // Field type definitions for proper HubSpot formatting
@@ -2130,16 +2526,8 @@ async function pushAbstractedToHubspot(){
     'financing_contingency','inspection_contingency','environmental_contingency','survey_required'
   ]);
 
-  function toHsDate(val){
-    if(!val) return null;
-    // Already a timestamp
-    if(typeof val === 'number') return val.toString();
-    var s = val.toString().trim();
-    // Try parsing various date formats
-    var d = new Date(s);
-    if(!isNaN(d.getTime())) return d.getTime().toString();
-    return null;
-  }
+  // HubSpot date properties take YYYY-MM-DD; this avoids time-zone shifts from timestamps
+  function toHsDate(val){ return absYMD(val) || null; }
 
   function toHsBool(val){
     if(val===true||val==='true'||val==='yes'||val==='Yes'||val===1) return 'true';
@@ -2269,6 +2657,7 @@ async function pushAbstractedToHubspot(){
   };
 
   var enumFields = new Set(Object.keys(enumNorm));
+  var numericFields = new Set(['total_building_sf','rentable_sf','usable_sf','clear_height_ft','dock_high_doors','grade_level_doors','drive_in_doors','office_sf','year_built','parking_spaces','trailer_storage_spaces','base_rent_year1_psf','base_rent_year1_annual','base_rent_year1_monthly','free_rent_months','security_deposit','ti_allowance_psf','ti_allowance_total','nnn_expenses_psf','nnn_cap_amount','renewal_options_count','renewal_term_years','renewal_notice_months','termination_notice_months','purchase_price','price_psf','earnest_money','due_diligence_days','loan_amount','lot_size_acres','year_built_sale','lease_term_months','moving_allowance']);
 
   Object.entries(fieldMap).forEach(([src,dst])=>{
     var val = abstractedData[src];
@@ -2283,22 +2672,26 @@ async function pushAbstractedToHubspot(){
       var ev = enumNorm[src](val.toString());
       if(ev) props[dst] = ev;
       // if null, skip — don't send invalid enum value
+    } else if(src==='rent_escalation_pct'){
+      // HubSpot percent properties hold a decimal fraction (0.04 = 4%)
+      var pn = absNum(val); if(pn!==null) props[dst] = pctToHs(pn>0 && pn<0.25 ? pn*100 : pn);
+    } else if(numericFields.has(src)){
+      var nn = absNum(val); props[dst] = (nn!==null) ? nn.toString() : val.toString();
     } else {
       props[dst] = val.toString();
     }
   });
+  if(Array.isArray(abstractedData.rent_steps_monthly) && abstractedData.rent_steps_monthly.length>1) props['custom_rent_steps'] = abstractedData.rent_steps_monthly.join(', ');
 
   try{
-    var r = await hsPatch(currentDealId, {properties:props});
-    if(r.ok){
-      el('abstractSaveStatus').textContent='✓ Saved to HubSpot — '+Object.keys(props).length+' fields pushed to deal record. Refresh HubSpot to see changes.';
+    var res = await hsPatchSafe(currentDealId, props);
+    if(res.ok){
+      el('abstractSaveStatus').textContent='✓ Saved to HubSpot — '+res.saved+' fields pushed to the deal.'+skippedNote(res.skipped);
       el('abstractSaveStatus').className='save-status ok';
     } else {
-      var errData = await r.json().catch(()=>({message:'Unknown error'}));
-      var errMsg = errData.message || errData.error || JSON.stringify(errData);
-      el('abstractSaveStatus').textContent='HubSpot Error: '+errMsg;
+      el('abstractSaveStatus').textContent='HubSpot Error: '+res.error+skippedNote(res.skipped);
       el('abstractSaveStatus').className='save-status err';
-      console.error('HubSpot push error:', errData, 'Props sent:', props);
+      console.error('HubSpot push error:', res, 'Props sent:', props);
     }
   }catch(e){
     el('abstractSaveStatus').textContent='Connection error: '+e.message;
