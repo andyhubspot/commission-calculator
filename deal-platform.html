@@ -770,6 +770,8 @@ input[type=range] {
   <div class="nav-tab active" onclick="showTab('overview',this)"><span class="tab-icon">◈</span> Deal Overview</div>
   <div class="nav-tab" onclick="showTab('calculator',this)"><span class="tab-icon">◎</span> Commission</div>
   <div class="nav-tab" onclick="showTab('abstractor',this)"><span class="tab-icon">◇</span> Lease / PSA Abstractor</div>
+  <div class="nav-tab" onclick="showTab('review',this)"><span class="tab-icon">✎</span> Document Review</div>
+  <div class="nav-tab" onclick="showTab('analysis',this); nerFirstOpen()"><span class="tab-icon">∑</span> Financial Analysis</div>
   <div class="nav-tab" onclick="showTab('comparator',this)"><span class="tab-icon">⊞</span> Proposal Comparator</div>
   <div class="nav-tab" onclick="showTab('advisor',this)"><span class="tab-icon">◉</span> AI Deal Advisor</div>
 </div>
@@ -1071,10 +1073,11 @@ input[type=range] {
           <div class="save-status" id="saveCommStatus"></div>
           <div style="margin-top:16px;border-top:1px solid #ddd;padding-top:12px">
             <div class="section-title">Send to Accounting</div>
-            <div class="field-grp"><div class="field-lbl">To</div><input type="email" id="acctEmail" value="Renee.Chastain@jll.com"/></div>
-            <div class="field-grp"><div class="field-lbl">CC</div><input type="email" id="acctCc" value="Andrew.Agyemang@jll.com"/></div>
+            <div class="field-grp"><div class="field-lbl">To</div><input type="text" id="acctEmail" value="Renee.Chastain@jll.com"/></div>
+            <div class="field-grp"><div class="field-lbl">CC</div><input type="text" id="acctCc" value="Andrew.Agyemang@jll.com; andy.moore@jll.com"/></div>
             <div class="btn-row" style="display:flex;gap:8px">
-              <button class="btn btn-success" onclick="emailAccounting()">✉ Email Invoice Request</button>
+              <button class="btn btn-success" onclick="emailAccounting('web')">✉ Email in Outlook (web)</button>
+              <button class="btn btn-outline" onclick="emailAccounting('app')">Email in Outlook App</button>
               <button class="btn btn-outline" onclick="copyAccountingSummary()">Copy Summary</button>
             </div>
             <div class="save-status" id="acctStatus"></div>
@@ -1147,6 +1150,72 @@ input[type=range] {
   </div>
 
   <!-- ── TAB 4: COMPARATOR ── -->
+  <!-- ── TAB: DOCUMENT REVIEW ── -->
+  <div id="tab-review" class="tab-content">
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:1.5rem">
+      <div class="card">
+        <div class="section-title">Review a Lease, PSA, LOI or Proposal</div>
+        <div class="field-grp">
+          <div class="field-lbl">Document</div>
+          <div id="reviewDocStatus" style="font-size:12px;margin-bottom:6px">No document loaded — upload one here or on the Lease / PSA Abstractor tab.</div>
+          <input type="file" accept=".pdf,.doc,.docx" id="reviewFile" onchange="handleReviewUpload(event)"/>
+        </div>
+        <div class="two-col">
+          <div class="field-grp"><div class="field-lbl">My Client Is The</div>
+            <select id="reviewSide"><option value="Tenant">Tenant</option><option value="Landlord">Landlord</option><option value="Buyer">Buyer</option><option value="Seller">Seller</option></select></div>
+          <div class="field-grp"><div class="field-lbl">Document Type</div>
+            <select id="reviewDocType"><option>Proposed Lease</option><option>Lease Amendment / Renewal</option><option>LOI / Proposal</option><option>Purchase and Sale Agreement</option><option>Other</option></select></div>
+        </div>
+        <div class="field-grp"><div class="field-lbl">What Matters To This Client</div>
+          <textarea id="reviewGoals" rows="4" style="width:100%" placeholder="e.g. Needs flexibility to exit after year 3, wants lowest occupancy cost, may expand, is weighing building vs. leasing"></textarea></div>
+        <div class="field-grp"><label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="reviewDev" style="width:auto"/> Client is considering development (build-to-suit, land purchase, expansion)</label></div>
+        <button class="btn btn-success" id="reviewBtn" onclick="runDocReview()">Run Review</button>
+        <div class="save-status" id="reviewStatus"></div>
+        <div style="font-size:11px;color:#888;margin-top:10px">An AI read to support your advice to the client. It is not legal advice and does not replace attorney review.</div>
+      </div>
+      <div class="card">
+        <div class="section-title">Review</div>
+        <div id="reviewOutput" style="font-size:13px;line-height:1.55">Run a review to see pros, cons, risks, negotiation points and questions for your client.</div>
+        <div id="reviewActions" class="btn-row" style="display:none;gap:8px;margin-top:14px">
+          <button class="btn btn-success" onclick="saveReport('review')">⬆ Save to HubSpot Deal</button>
+          <button class="btn btn-outline" onclick="downloadReportDoc('review')">Download Word File</button>
+          <button class="btn btn-outline" onclick="printReport('review')">Print / PDF</button>
+        </div>
+        <div class="save-status" id="reviewSaveStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: FINANCIAL ANALYSIS ── -->
+  <div id="tab-analysis" class="tab-content">
+    <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:1.5rem">
+      <div class="card">
+        <div class="section-title">Effective Rent Calculator — Inputs</div>
+        <div class="btn-row" style="display:flex;gap:8px;margin-bottom:10px">
+          <button class="btn btn-outline" onclick="nerPullFromCommission(true)">Pull from Commission Tab</button>
+          <button class="btn btn-outline" onclick="nerClear()">Clear</button>
+        </div>
+        <div id="nerPullNote" style="font-size:11px;color:#888;margin-bottom:8px"></div>
+        <div id="nerInputs"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Results</div>
+        <div id="nerResults" style="font-size:12px">Enter the premises size, term and starting rent to see results.</div>
+        <div id="nerActions" class="btn-row" style="display:none;gap:8px;margin-top:14px">
+          <button class="btn btn-success" onclick="saveReport('ner')">⬆ Save to HubSpot Deal</button>
+          <button class="btn btn-outline" onclick="downloadReportDoc('ner')">Download Word File</button>
+          <button class="btn btn-outline" onclick="printReport('ner')">Print / PDF</button>
+        </div>
+        <div class="save-status" id="nerSaveStatus"></div>
+        <div style="font-size:11px;color:#888;margin-top:10px">Rent and charges paid monthly in advance, no proration. One-time costs and allowances at commencement. Levelized rent is the flat rent with the same present value at the discount rate. Not modeled: taxes on concessions, security deposit, options, commissions.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem">
+      <div class="section-title">Coming Next</div>
+      <div style="font-size:12px;color:#666">Lease vs. buy, and build-to-suit vs. existing building vs. buy land and build.</div>
+    </div>
+  </div>
+
   <div id="tab-comparator" class="tab-content">
 
     <div class="card" id="compSetupCard">
@@ -1497,7 +1566,7 @@ async function loadGlobalDeal(){
   currentDealId = dealId;
 
   // Keep props list lean to avoid URL length limits
-  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split,rent_escalation,lease_commencement_date,lease_expiration,rentable_sf,base_rent_year_1_psf,base_rent_year_1_monthly,free_rent_months,lease_type,purchase_price,ti_allowances_psf,ti_allowance_total,escalation_frequency,escalation_frequency_months,free_rent_type,free_rent_partial_percent,free_rent_timing,free_rent_custom_months,custom_rent_steps,nnn_expenses_psf,moving_allowance,landlord_work_cost,other_concessions,effective_rent_discount_rate,lease_term_months,ownerlandlord_legal_entity,ownerlandlord_contact_name,ownerlandlord_contact_email,tenant_legal_entity,property_address,building_name,suiteunit_number';
+  var propsToFetch = Object.values(PROPS).join(',') + ',dealname,dealstage,pipeline,amount,closedate,hubspot_owner_id,cobroker_one_name,cobroker_one_company,cobroker_one_split,cobroker_two_name,cobroker_two_company,cobroker_two_split,cobroker_three_name,cobroker_t_company,cobroker_three_split,rent_escalation,lease_commencement_date,lease_expiration,rentable_sf,base_rent_year_1_psf,base_rent_year_1_monthly,free_rent_months,lease_type,purchase_price,ti_allowances_psf,ti_allowance_total,escalation_frequency,escalation_frequency_months,free_rent_type,free_rent_partial_percent,free_rent_timing,free_rent_custom_months,custom_rent_steps,nnn_expenses_psf,moving_allowance,landlord_work_cost,other_concessions,effective_rent_discount_rate,lease_term_months,deal_platform_report_notes,ownerlandlord_legal_entity,ownerlandlord_contact_name,ownerlandlord_contact_email,tenant_legal_entity,property_address,building_name,suiteunit_number';
   // Trim to safe URL length if needed
   try{
     var r = await hsGet(dealId, propsToFetch);
@@ -1551,7 +1620,7 @@ function populateOverview(p, name, dealId){
 }
 
 function populateCalculatorFromDeal(p){
-  if(p.pipeline && PIPELINE_SIDE[p.pipeline]) el('dealSide').value=PIPELINE_SIDE[p.pipeline];
+  if(p.pipeline && PIPELINE_SIDE[p.pipeline]){ el('dealSide').value=PIPELINE_SIDE[p.pipeline]; el('reviewSide').value={tenant:'Tenant',landlord:'Landlord',seller:'Seller',buyer:'Buyer'}[PIPELINE_SIDE[p.pipeline]]; }
   if(p.dealtype && Array.from(el('dealType').options).some(function(o){return o.value===p.dealtype;})) el('dealType').value=p.dealtype;
   onDealTypeChange();
   // Referral type + fee, so a save doesn't wipe what is already on the deal
@@ -1719,7 +1788,7 @@ function calcCommission(){
       // NPV version: rent paid monthly in advance, concessions paid up front, restated as a level rent
       var disc = parseFloat(el('discRate').value);
       if(!isNaN(disc) && disc>=0){
-        var rM=disc/100/12, pv=0, ann=0;
+        var rM=Math.pow(1+disc/100,1/12)-1, pv=0, ann=0;
         sched.flows.forEach(function(f,idx){ var d=Math.pow(1+rM,idx); pv+=f.rent/d; ann+=1/d; });
         eff.npv = (pv-concessions)/ann*12/sf; eff.disc = disc;
         el('rNPVRow').style.display=''; el('rNPVLbl').textContent='NPV Net Effective Rent ('+disc+'% discount)'; el('rNPV').textContent=p2(eff.npv);
@@ -1902,7 +1971,6 @@ async function saveCommission(){
       props['net_effective_rent_psf']=r2(L.eff.ner);
       props['landlord_net_effective_rent_psf']=r2(L.eff.nerLL);
       if(L.eff.npv!==null){ props['npv_net_effective_rent_psf']=r2(L.eff.npv); props['effective_rent_discount_rate']=pctToHs(L.eff.disc); }
-      if(L.eff.occTotal!==null) props['total_occupancy_cost']=Math.round(L.eff.occTotal).toString();
     }
     var ltBtn=document.querySelector('#leaseCalcFields .tog-btn.on[onclick*="setLeaseType"]');
     if(ltBtn) props['lease_type']=ltBtn.textContent.trim();
@@ -1929,6 +1997,233 @@ async function saveCommission(){
   }catch(e){ el('saveCommStatus').textContent='Connection error'; el('saveCommStatus').className='save-status err'; }
   el('saveCommBtn').disabled=false;
 }
+
+// ── FINANCIAL ANALYSIS: NET EFFECTIVE RENT (mirrors the NER workbook) ────────
+var NER_FIELDS = [
+  ['h','LEASE BASICS'],
+  ['rsf','Premises size (RSF)','num'],['start','Lease commencement date','date'],['term','Lease term (months)','num'],['disc','Discount rate (annual %)','pct',8],
+  ['h','BASE RENT'],
+  ['rate0','Starting base rent ($/RSF/yr)','num'],['escPct','Escalation — percent per step (%)','pct'],['escDollar','Escalation — $/RSF per step','num'],['escFreq','Escalation frequency (months)','num',12],
+  ['h','OPERATING EXPENSES'],
+  ['structure','Lease structure','sel',['NNN','Full Service Gross','Base Year / Expense Stop']],['opex0','Building opex ($/RSF/yr, Year 1)','num'],['opexGrowth','Opex growth (% per year)','pct',3],['stop','Base year / expense stop ($/RSF/yr)','num'],
+  ['h','FREE RENT / ABATEMENT'],
+  ['freeMonths','Free rent months (from commencement)','num'],['abatePct','% of base rent abated','pct',100],['abateOpex','Abate opex during free rent?','sel',['No','Yes']],
+  ['h','PARKING (OPTIONAL)'],
+  ['stalls','Parking stalls','num'],['stallRate','Monthly rate per stall ($)','num'],['parkGrowth','Parking annual increase (%)','pct'],
+  ['h','LANDLORD CONCESSIONS (reduce cost)'],
+  ['tiAllowPsf','TI allowance ($/RSF)','num'],['moveAllow','Moving / relocation allowance ($)','num'],['otherCash','Other cash concessions / lease takeover ($)','num'],
+  ['h','TENANT ONE-TIME COSTS'],
+  ['tiCostPsf','Total TI build-out cost ($/RSF)','num'],['softPct','Architect / design / PM fees (% of build-out)','pct'],['moveCost','Moving expenses ($)','num'],['ffePsf','FF&E / furniture ($/RSF)','num'],['itPsf','IT / cabling / AV / security ($/RSF)','num'],['overlap','Overlap / holdover rent at existing space ($)','num'],['legal','Legal / other one-time costs ($)','num']
+];
+function nerRenderInputs(){
+  el('nerInputs').innerHTML = NER_FIELDS.map(function(f){
+    if(f[0]==='h') return '<div class="section-title" style="margin-top:14px">'+f[1]+'</div>';
+    var id='ner_'+f[0], ctl;
+    if(f[2]==='sel') ctl='<select id="'+id+'" onchange="nerCalc()">'+f[3].map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>';
+    else ctl='<input type="'+(f[2]==='date'?'date':'number')+'" id="'+id+'" '+(f[3]!==undefined?'value="'+f[3]+'" ':'')+'step="any" oninput="nerCalc()"/>';
+    return '<div class="field-grp" style="display:grid;grid-template-columns:1.5fr 1fr;gap:10px;align-items:center;margin-bottom:6px"><div class="field-lbl" style="margin:0">'+f[1]+'</div>'+ctl+'</div>';
+  }).join('');
+}
+function nerRead(){
+  var i={}; NER_FIELDS.forEach(function(f){ if(f[0]==='h') return; var v=el('ner_'+f[0]).value; i[f[0]] = (f[2]==='sel'||f[2]==='date') ? v : (parseFloat(v)||0); });
+  return i;
+}
+// Pure calculation — same formulas as the workbook's Calculator and Schedule sheets
+function nerCompute(i){
+  var term=Math.min(240,Math.max(0,Math.round(i.term))), rsf=i.rsf, yrs=term/12, freq=Math.max(1,Math.round(i.escFreq||12));
+  var rm=Math.pow(1+i.disc/100,1/12)-1, abate=i.abatePct/100, nnn=i.structure==='NNN', fsg=i.structure==='Full Service Gross';
+  var S={F:0,G:0,H:0,J:0,K:0,L:0,M:0,pvM:0,pvH:0}, rows=[], annual={};
+  for(var a=1;a<=term;a++){
+    var steps=Math.floor((a-1)/freq), yr=Math.floor((a-1)/12);
+    var E=i.rate0*Math.pow(1+i.escPct/100,steps)+i.escDollar*steps, F=rsf*E/12, isFree=a<=i.freeMonths;
+    var G=isFree?-F*abate:0, H=F+G, I=i.opex0*Math.pow(1+i.opexGrowth/100,yr);
+    var J=rsf/12*(nnn?0:(fsg?I:Math.min(I,i.stop)))*(1-(isFree?abate:0));
+    var K=rsf/12*(nnn?I:(fsg?0:Math.max(0,I-i.stop)))*(1-(i.abateOpex==='Yes'?(isFree?abate:0):0));
+    var L=i.stalls*i.stallRate*Math.pow(1+i.parkGrowth/100,yr), M=H+K+L, N=1/Math.pow(1+rm,a-1);
+    S.F+=F;S.G+=G;S.H+=H;S.J+=J;S.K+=K;S.L+=L;S.M+=M;S.pvM+=M*N;S.pvH+=H*N;
+    var A=annual[yr+1]||(annual[yr+1]={year:yr+1,months:0,F:0,G:0,H:0,K:0,L:0,M:0});
+    A.months++;A.F+=F;A.G+=G;A.H+=H;A.K+=K;A.L+=L;A.M+=M;
+    rows.push({month:a,rate:E,F:F,G:G,H:H,K:K,L:L,M:M});
+  }
+  var tiCost=rsf*i.tiCostPsf*(1+i.softPct/100), tiUsed=i.tiCostPsf===0?rsf*i.tiAllowPsf:Math.min(rsf*i.tiAllowPsf,tiCost);
+  var moveUsed=i.moveCost===0?i.moveAllow:Math.min(i.moveAllow,i.moveCost);
+  var r={}; r.face=S.F; r.abatement=S.G; r.paid=S.F+S.G; r.ti=-tiUsed; r.move=-moveUsed; r.other=-i.otherCash;
+  r.ner=r.paid+r.ti+r.move+r.other; r.opexIncl=-S.J; r.nerNNN=r.ner+r.opexIncl;
+  r.opexPaid=S.K; r.parking=S.L; r.egr=r.ner+r.opexPaid+r.parking;
+  r.tiCost=tiCost; r.moveCost=i.moveCost; r.ffe=rsf*i.ffePsf; r.it=rsf*i.itPsf; r.overlap=i.overlap; r.legal=i.legal;
+  var oneTime=r.tiCost+r.moveCost+r.ffe+r.it+r.overlap+r.legal;
+  r.allIn=r.egr+oneTime; r.upfront=r.ti+r.move+r.other+oneTime;
+  function pmt(pv){ if(!term||!rsf) return 0; var p=rm===0?pv/term:pv*rm/(1-Math.pow(1+rm,-term))/(1+rm); return p*12/rsf; }
+  r.pvAllIn=r.upfront+S.pvM; r.levAllIn=pmt(r.pvAllIn);
+  r.pvNer=r.ti+r.move+r.other+S.pvH; r.levNer=pmt(r.pvNer);
+  r.concessions=-(r.abatement+r.ti+r.move+r.other); r.concPct=r.face?r.concessions/r.face:0; r.nerPct=r.face?r.ner/r.face:0;
+  r.tiTenantFunded=Math.max(0,tiCost-tiUsed);
+  r.psf=function(total){ return (rsf&&yrs)?total/(rsf*yrs):0; };
+  r.annual=Object.keys(annual).map(function(k){ var A=annual[k]; A.psf=rsf?A.M/(rsf*A.months/12):0; return A; });
+  r.rows=rows; r.term=term; r.rsf=rsf; r.yrs=yrs; r.ok=rsf>0&&term>0&&i.rate0>0;
+  return r;
+}
+var nerLast=null;
+function nerCalc(){
+  var i=nerRead(), r=nerCompute(i); nerLast={i:i,r:r};
+  el('nerActions').style.display=r.ok?'flex':'none';
+  if(!r.ok){ el('nerResults').innerHTML='Enter the premises size, term and starting rent to see results.'; return; }
+  el('nerResults').innerHTML=nerReportHtml(false);
+}
+function nerReportHtml(forFile){
+  var i=nerLast.i, r=nerLast.r, m0=function(n){ return (n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString('en-US'); }, m2=function(n){ return (n<0?'-$':'$')+Math.abs(n).toFixed(2); };
+  var td='style="padding:5px 6px;text-align:right;border-bottom:1px solid #eee"', tl='style="padding:5px 6px;border-bottom:1px solid #eee"';
+  function row(label,total,bold){ var p=r.psf(total), st=bold?'font-weight:700;background:#f4f4f4':''; return '<tr style="'+st+'"><td '+tl+'>'+label+'</td><td '+td+'>'+m0(total)+'</td><td '+td+'>'+m2(p)+'</td><td '+td+'>'+m2(p/12)+'</td></tr>'; }
+  function head(t){ return '<tr><td colspan="4" style="padding:10px 6px 4px;font-weight:700;font-size:11px;letter-spacing:.04em;color:#c8401a">'+t+'</td></tr>'; }
+  function lev(label,pv,l){ return '<tr><td '+tl+'>'+label+'</td><td '+td+'>'+m0(pv)+'</td><td '+td+'>'+m2(l)+'</td><td '+td+'>'+m2(l/12)+'</td></tr>'; }
+  var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="color:#888;font-size:11px"><td '+tl+'></td><td '+td+'>Total ($)</td><td '+td+'>$/RSF/yr</td><td '+td+'>$/RSF/mo</td></tr>'+
+    head('RESULTS')+row('Face base rent (scheduled, full term)',r.face)+row('Less: rent abatement',r.abatement)+row('Base rent paid',r.paid)+row('Less: TI allowance (utilized)',r.ti)+row('Less: moving / relocation allowance (utilized)',r.move)+row('Less: other cash concessions',r.other)+
+    row('NET EFFECTIVE RENT (as quoted)',r.ner,true)+row('Less: opex included in base rent (gross / base year)',r.opexIncl)+row('NET EFFECTIVE RENT — NNN-equivalent',r.nerNNN,true)+
+    head('ALL-IN OCCUPANCY COST (TENANT VIEW)')+row('Net effective rent (as quoted)',r.ner)+row('Plus: tenant-paid opex pass-throughs',r.opexPaid)+row('Plus: parking',r.parking)+row('EFFECTIVE GROSS RENT (before one-time costs)',r.egr,true)+
+    row('Plus: TI build-out cost incl. soft costs',r.tiCost)+row('Plus: moving expenses',r.moveCost)+row('Plus: FF&E / furniture',r.ffe)+row('Plus: IT / cabling / AV / security',r.it)+row('Plus: overlap / holdover rent',r.overlap)+row('Plus: legal / other one-time costs',r.legal)+row('ALL-IN EFFECTIVE OCCUPANCY COST',r.allIn,true)+
+    head('TIME-VALUE VIEW (DISCOUNTED AT '+i.disc+'%)')+lev('All-in cost: present value / levelized rent',r.pvAllIn,r.levAllIn)+lev('Net effective rent: present value / levelized rent',r.pvNer,r.levNer)+
+    head('KEY METRICS')+row('Total concessions (abatement + allowances + cash)',r.concessions)+
+    '<tr><td '+tl+'>Concessions as % of face rent</td><td '+td+'>'+(r.concPct*100).toFixed(1)+'%</td><td '+td+'></td><td '+td+'></td></tr>'+
+    '<tr><td '+tl+'>Net effective rent as % of face rent</td><td '+td+'>'+(r.nerPct*100).toFixed(1)+'%</td><td '+td+'></td><td '+td+'></td></tr>'+
+    '<tr><td '+tl+'>Net upfront cash outlay (costs less allowances)</td><td '+td+'>'+m0(r.upfront)+'</td><td '+td+'></td><td '+td+'></td></tr></table>';
+  h+='<div style="font-weight:700;font-size:11px;letter-spacing:.04em;color:#c8401a;margin:14px 0 4px">ANNUAL SUMMARY BY LEASE YEAR</div><table style="width:100%;border-collapse:collapse;font-size:11px"><tr style="color:#888"><td '+tl+'>Yr</td><td '+td+'>Scheduled rent</td><td '+td+'>Abatement</td><td '+td+'>Rent paid</td><td '+td+'>Tenant opex</td><td '+td+'>Parking</td><td '+td+'>All-in recurring</td><td '+td+'>$/RSF/yr</td></tr>'+
+    r.annual.map(function(A){ return '<tr><td '+tl+'>'+A.year+(A.months<12?' ('+A.months+' mo)':'')+'</td><td '+td+'>'+m0(A.F)+'</td><td '+td+'>'+m0(A.G)+'</td><td '+td+'>'+m0(A.H)+'</td><td '+td+'>'+m0(A.K)+'</td><td '+td+'>'+m0(A.L)+'</td><td '+td+'>'+m0(A.M)+'</td><td '+td+'>'+m2(A.psf)+'</td></tr>'; }).join('')+'</table>';
+  if(forFile){
+    var inp='<div style="font-weight:700;font-size:11px;letter-spacing:.04em;color:#c8401a;margin:14px 0 4px">INPUTS</div><table style="width:100%;border-collapse:collapse;font-size:11px">'+
+      NER_FIELDS.filter(function(f){return f[0]!=='h';}).map(function(f){ var v=el('ner_'+f[0]).value; return (v===''||v==='0')?'':'<tr><td '+tl+'>'+f[1]+'</td><td '+td+'>'+v+'</td></tr>'; }).join('')+'</table>';
+    h=inp+h;
+  }
+  return h;
+}
+function nerClear(){ nerRenderInputs(); el('nerPullNote').textContent=''; nerCalc(); }
+var nerOpened=false;
+function nerFirstOpen(){ if(!nerOpened){ nerOpened=true; if(currentLease && currentLease.sf>0 && currentLease.psf>0) nerPullFromCommission(false); } }
+function nerPullFromCommission(announce){
+  var L=currentLease;
+  if(!L || !(L.sf>0 && L.psf>0)){ if(announce){ el('nerPullNote').textContent='Nothing to pull yet — enter the lease on the Commission tab (or run the abstractor) first.'; } return; }
+  var set=function(k,v){ el('ner_'+k).value=v; }, notes=[];
+  set('rsf',L.sf); set('start',el('leaseStart').value||''); set('term',L.term);
+  if(L.eff && L.eff.disc!==null && L.eff.disc!==undefined) set('disc',L.eff.disc);
+  set('rate0',Math.round(L.psf*10000)/10000); set('escPct',L.esc); set('escFreq',L.stepMonths);
+  var lt=(document.querySelector('#leaseCalcFields .tog-btn.on[onclick*="setLeaseType"]')||{textContent:'NNN'}).textContent.trim();
+  set('structure',lt==='NNN'?'NNN':(lt==='Gross'?'Full Service Gross':'Base Year / Expense Stop'));
+  set('opex0',L.nnnPsf||0);
+  set('freeMonths',L.free); set('abatePct',L.partialPct); set('abateOpex',L.freeType==='Full'?'Yes':'No');
+  set('tiAllowPsf',Math.round(L.tiPsf*100)/100); set('moveAllow',L.moveAllow); set('otherCash',L.otherConc+L.llWork);
+  if(L.free>0 && L.timing!=='start') notes.push('free rent is treated as the first '+L.free+' months here (the Commission tab has it '+(L.timing==='custom'?'in custom months':L.timing)+')');
+  if(L.hasSteps) notes.push('custom rent steps are not carried over — this sheet uses the starting rent and escalation');
+  el('nerPullNote').textContent='Pulled from the Commission tab.'+(notes.length?' Note: '+notes.join('; ')+'.':'');
+  nerCalc();
+}
+
+// ── DOCUMENT REVIEW ───────────────────────────────────────────────────────────
+var reviewData=null;
+function mdToHtml(t){
+  var esc=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var out=[], inList=false;
+  esc.split(/\r?\n/).forEach(function(line){
+    var li=line.match(/^\s*[-*•]\s+(.*)$/), num=line.match(/^\s*\d+[.)]\s+(.*)$/), hd=line.match(/^#{1,4}\s+(.*)$/);
+    if(li||num){ if(!inList){ out.push('<ul style="margin:6px 0 10px 18px">'); inList=true; } out.push('<li style="margin-bottom:4px">'+(li?li[1]:num[1])+'</li>'); return; }
+    if(inList){ out.push('</ul>'); inList=false; }
+    if(hd) out.push('<h3 style="font-size:14px;margin:14px 0 6px;color:#c8401a">'+hd[1]+'</h3>');
+    else if(line.trim()) out.push('<p style="margin:6px 0">'+line+'</p>');
+  });
+  if(inList) out.push('</ul>');
+  return out.join('').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+}
+function reviewDocLabel(){ el('reviewDocStatus').textContent = abstractDocObject ? ('Document loaded: '+(abstractFileName||'uploaded file')+' — shared with the Abstractor tab.') : 'No document loaded — upload one here or on the Lease / PSA Abstractor tab.'; }
+var abstractFileName='';
+async function handleReviewUpload(event){
+  var file=event.target.files[0]; if(!file) return;
+  el('reviewDocStatus').textContent='Reading '+file.name+'…';
+  try{ abstractDocObject=await readDocumentFile(file); abstractFileData=abstractDocObject.data; abstractFileName=file.name; reviewDocLabel(); if(el('abstractBtn')) el('abstractBtn').disabled=false; }
+  catch(e){ el('reviewDocStatus').textContent='Could not read that file: '+(e.message||e); }
+}
+async function aiAsk(content, maxTokens){
+  var r=await fetch(AI_BASE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTokens,messages:[{role:'user',content:content}]})});
+  var data=await r.json().catch(function(){ return {}; });
+  if(!r.ok || data.error || data.type==='error') throw new Error(data.error ? (typeof data.error==='string'?data.error:JSON.stringify(data.error)) : ('the AI service timed out or returned an error (HTTP '+r.status+')'));
+  var text=data.content&&data.content[0]?data.content[0].text:''; if(!text) throw new Error('empty response');
+  return text;
+}
+async function runDocReview(){
+  if(!abstractDocObject){ el('reviewStatus').textContent='Upload a document first.'; el('reviewStatus').className='save-status err'; return; }
+  var side=el('reviewSide').value, docType=el('reviewDocType').value, goals=el('reviewGoals').value.trim(), dev=el('reviewDev').checked;
+  var deal=currentDealData?('\nDeal: '+(currentDealData.dealname||'')+' ('+(currentDealData.dealtype||'')+')'):'';
+  var base='You are advising Andy Moore, an industrial real estate broker at JLL in Denver, Colorado. Her client is the '+side.toUpperCase()+'. Review the attached '+docType+' strictly from the '+side+"'s point of view."+deal+(goals?'\nWhat matters to this client: '+goals:'')+'\nBe specific: cite the section or clause and quote the key numbers and dates. Use short markdown headers (##) and bullet points. Do not restate the whole document. If something is not in the document, say it is not addressed rather than guessing. Keep it under 450 words.\n\n';
+  var parts=[
+    ['Summary, Pros and Cons', base+'Write three sections: "## Deal Summary" (5 bullets max: parties, premises, term, economics, key dates), "## Pros for the '+side+'" and "## Cons for the '+side+'".'],
+    ['Risks and Clauses', base+'Write two sections: "## Risks to the '+side+'" (rank High / Medium / Low, with why) and "## Unusual or Missing Clauses" (terms that are off-market for Denver industrial, one-sided, ambiguous, or absent but normally expected).'],
+    ['Negotiation and Questions', base+'Write two sections: "## Points to Negotiate" (each with the change to ask for and suggested replacement language) and "## Questions to Ask the Client".'+(dev?' Then add "## Development Considerations": how this document affects a build-to-suit, land purchase or expansion path — entitlements and zoning, delivery timing and delay remedies, construction cost and change-order risk, contingencies, and whether leasing, buying or building looks better on these terms.':'')]
+  ];
+  el('reviewBtn').disabled=true; el('reviewActions').style.display='none';
+  el('reviewStatus').textContent='Reviewing — three passes running, usually under a minute…'; el('reviewStatus').className='save-status working';
+  var results=await Promise.all(parts.map(function(pt){ return aiAsk(docToMessageContent(abstractDocObject, pt[1]), 1300).then(function(t){ return {ok:true,text:t}; }, function(e){ return {ok:false,text:'## '+pt[0]+'\nThis section could not be completed: '+(e.message||e)+'. Try again; for very long documents, upload only the relevant sections.'}; }); }));
+  var failed=results.filter(function(x){return !x.ok;}).length;
+  var md=results.map(function(x){return x.text;}).join('\n\n');
+  reviewData={side:side, docType:docType, goals:goals, dev:dev, file:abstractFileName, html:mdToHtml(md), when:new Date()};
+  el('reviewOutput').innerHTML=reviewData.html;
+  el('reviewActions').style.display=failed===parts.length?'none':'flex';
+  el('reviewStatus').textContent=failed?(failed+' of '+parts.length+' sections did not finish — see the note in the review.'):'✓ Review complete.';
+  el('reviewStatus').className=failed?'save-status err':'save-status ok';
+  el('reviewBtn').disabled=false;
+}
+
+// ── REPORTS: Word file, print, and save to the HubSpot deal ───────────────────
+function reportParts(kind){
+  var dealName=(currentDealData&&currentDealData.dealname)||'', date=new Date().toLocaleDateString('en-US');
+  if(kind==='ner'){
+    if(!nerLast||!nerLast.r.ok) return null; var r=nerLast.r;
+    return {title:'Net Effective Rent Analysis', slug:'NER-Analysis', body:nerReportHtml(true),
+      summary:'<p><strong>Net effective rent:</strong> $'+r.psf(r.ner).toFixed(2)+'/RSF/yr &nbsp; <strong>Effective gross rent:</strong> $'+r.psf(r.egr).toFixed(2)+'/RSF/yr &nbsp; <strong>All-in occupancy cost:</strong> $'+Math.round(r.allIn).toLocaleString('en-US')+' &nbsp; <strong>Levelized NER:</strong> $'+r.levNer.toFixed(2)+'/RSF/yr</p>',
+      props:{ net_effective_rent_psf:r.psf(r.ner).toFixed(2), average_rent_psf:r.psf(r.paid).toFixed(2), effective_gross_rent_psf:r.psf(r.egr).toFixed(2), npv_net_effective_rent_psf:r.levNer.toFixed(2), levelized_occupancy_cost_psf:r.levAllIn.toFixed(2), total_occupancy_cost:Math.round(r.allIn).toString(), effective_rent_discount_rate:pctToHs(nerLast.i.disc) }, dealName:dealName, date:date};
+  }
+  if(kind==='review'){
+    if(!reviewData) return null;
+    return {title:'Document Review — '+reviewData.docType+' ('+reviewData.side+' side)', slug:'Document-Review',
+      body:'<p style="color:#666;font-size:11px">Document: '+(reviewData.file||'uploaded file')+(reviewData.goals?' | Client priorities: '+reviewData.goals.replace(/</g,'&lt;'):'')+'</p>'+reviewData.html+'<p style="color:#888;font-size:10px;margin-top:20px">AI-assisted review to support broker advice. Not legal advice; does not replace attorney review.</p>',
+      summary:'', props:{}, dealName:dealName, date:date};
+  }
+  return null;
+}
+function reportFileHtml(P){
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+P.title+'</title><style>body{font-family:Arial,sans-serif;max-width:820px;margin:36px auto;color:#222;font-size:12px}h1{font-size:19px;border-bottom:2px solid #c8401a;padding-bottom:8px}h3{font-size:14px}table{border-collapse:collapse;width:100%}</style></head><body><h1>'+P.title+'</h1><div style="color:#777;font-size:11px;margin-bottom:16px">'+(P.dealName?'Deal: '+P.dealName+' | ':'')+'Date: '+P.date+' | Prepared by: Andy Moore, JLL Industrial Brokerage</div>'+P.body+'</body></html>';
+}
+function reportFileName(P){ return ((P.dealName||'Deal').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'')||'Deal')+'-'+P.slug+'.doc'; }
+function reportStatus(kind,msg,cls){ var s=el(kind==='ner'?'nerSaveStatus':'reviewSaveStatus'); s.textContent=msg; s.className='save-status '+cls; }
+function downloadReportDoc(kind){
+  var P=reportParts(kind); if(!P) return;
+  var blob=new Blob(['\ufeff'+reportFileHtml(P)],{type:'application/msword'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=reportFileName(P); document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function printReport(kind){
+  var P=reportParts(kind); if(!P) return;
+  var w=window.open('','_blank'); if(!w){ reportStatus(kind,'Allow pop-ups for this site to print.','err'); return; }
+  w.document.write(reportFileHtml(P)); w.document.close(); w.focus(); setTimeout(function(){ w.print(); },300);
+}
+// Saves the report as a note on the deal timeline with the Word file attached. The same note and
+// file are updated on later saves (the note id is remembered on the deal), so there is one current copy.
+async function saveReport(kind){
+  var P=reportParts(kind); if(!P) return;
+  if(!currentDealId){ reportStatus(kind,'Load a deal first (enter the Deal ID at the top).','err'); return; }
+  reportStatus(kind,'Saving to HubSpot…','working');
+  var map={}; try{ map=JSON.parse((currentDealData&&currentDealData.deal_platform_report_notes)||'{}')||{}; }catch(e){ map={}; }
+  var fileHtml=reportFileHtml(P);
+  var b64=btoa(unescape(encodeURIComponent('\ufeff'+fileHtml)));
+  var noteBody='<p><strong>'+P.title+'</strong> — updated '+P.date+'</p>'+P.summary+(kind==='review'?P.body:'<p>Full sheet is in the attached Word file.</p>');
+  if(noteBody.length>60000) noteBody=noteBody.slice(0,60000)+'<p>… continued in the attached file.</p>';
+  try{
+    var r=await fetch(HS_BASE+'?dealId='+encodeURIComponent(currentDealId)+'&action=report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({noteId:map[kind]||null, noteBody:noteBody, fileName:reportFileName(P), fileBase64:b64})});
+    var out=await r.json().catch(function(){ return {}; });
+    if(!r.ok || !out.noteId){ reportStatus(kind,'Not saved — '+(out.error||out.message||('HTTP '+r.status))+(out.hint?' '+out.hint:''),'err'); return; }
+    map[kind]=out.noteId;
+    var props=Object.assign({}, P.props, {deal_platform_report_notes:JSON.stringify(map)});
+    var res=await hsPatchSafe(currentDealId, props);
+    if(currentDealData && res.ok && !res.skipped.some(function(x){return x.name==='deal_platform_report_notes';})) currentDealData.deal_platform_report_notes=props.deal_platform_report_notes;
+    reportStatus(kind,'✓ Saved to the deal as a '+(out.updated?'updated ':'')+'note'+(out.fileId?' with the Word file attached':' (the file could not be attached'+(out.fileError?': '+out.fileError:'')+')')+'.'+(res.ok?skippedNote(res.skipped):' Key numbers were not saved: '+res.error),'ok');
+  }catch(e){ reportStatus(kind,'Connection error: '+(e.message||e),'err'); }
+}
+try{ window.addEventListener('DOMContentLoaded', function(){ nerRenderInputs(); }); }catch(e){}
 
 // ── SEND TO ACCOUNTING ────────────────────────────────────────────────────────
 function buildAccountingSummary(includeSchedule){
@@ -1961,6 +2256,14 @@ function buildAccountingSummary(includeSchedule){
   }
   add('Commission rate', tx('rCommRate'));
   add('GROSS COMMISSION DUE', tx('rGross'));
+  if(!isSale && L && L.eff && L.eff.ner!==null){
+    lines.push(''); lines.push('Effective rent (per SF per year):');
+    if(L.tiTotal) add('  TI allowance', fmt(L.tiTotal)+' ($'+L.tiPsf.toFixed(2)+' PSF)');
+    add('  Average rent', '$'+L.eff.avg.toFixed(2));
+    add('  Net effective rent', '$'+L.eff.ner.toFixed(2));
+    add('  Landlord net effective (after commission)', '$'+L.eff.nerLL.toFixed(2));
+    if(L.eff.npv!==null) add('  NPV net effective ('+L.eff.disc+'% discount)', '$'+L.eff.npv.toFixed(2));
+  }
   lines.push('');
   if(currentReferral==='inbound') add(tx('rInboundLbl'), tx('rInbound')+' — '+[el('refBrokerName').value,el('refBrokerCompany').value].filter(Boolean).join(', '));
   else if(currentReferral!=='none') add(tx('rReferralLbl'), tx('rReferral')+' — '+[el('refBrokerName').value,el('refBrokerCompany').value].filter(Boolean).join(', '));
@@ -1978,22 +2281,41 @@ async function copyAccountingSummary(){
   try{ await navigator.clipboard.writeText(buildAccountingSummary(true)); el('acctStatus').textContent='✓ Summary copied — paste it anywhere.'; el('acctStatus').className='save-status ok'; return true; }
   catch(e){ el('acctStatus').textContent='Could not copy automatically.'; el('acctStatus').className='save-status err'; return false; }
 }
-function emailAccounting(){
-  if(!acctReady()) return;
-  var to=el('acctEmail').value.trim();
-  if(!/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+([,;]\s*[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+)*$/.test(to)){ el('acctStatus').textContent='Enter the accounting email address first.'; el('acctStatus').className='save-status err'; return; }
-  var cc=el('acctCc').value.trim();
-  if(cc && !/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(cc)){ el('acctStatus').textContent='The CC address does not look right.'; el('acctStatus').className='save-status err'; return; }
-  try{ localStorage.setItem('acctEmail', to); localStorage.setItem('acctCc', cc); }catch(e){}
-  var subject='Commission invoice request — '+((currentDealData&&currentDealData.dealname)||'deal');
-  var body=buildAccountingSummary(true), note='';
-  // Mail apps cut off very long links, so drop the rent schedule from the email if needed (it is still copied)
-  if(encodeURIComponent(body).length>1700){ body=buildAccountingSummary(false); note=' The rent schedule was too long for the email link — it is on your clipboard, paste it in.'; }
-  try{ navigator.clipboard.writeText(buildAccountingSummary(true)); }catch(e){}
-  window.location.href='mailto:'+encodeURIComponent(to).replace(/%40/g,'@').replace(/%2C/g,',')+'?'+(cc?'cc='+encodeURIComponent(cc).replace(/%40/g,'@')+'&':'')+'subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-  el('acctStatus').textContent='✓ Email opened in your mail app — review it and press send.'+note; el('acctStatus').className='save-status ok';
+function acctAddrs(text){
+  var list=(text||'').split(/[;,\s]+/).filter(Boolean);
+  var bad=list.filter(function(a){ return !/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(a); });
+  return {list:list, bad:bad};
 }
-try{ window.addEventListener('DOMContentLoaded', function(){ var v=null; try{ v=localStorage.getItem('acctEmail'); }catch(e){} if(v && el('acctEmail')) el('acctEmail').value=v; var c=null; try{ c=localStorage.getItem('acctCc'); }catch(e){} if(c!==null && el('acctCc')) el('acctCc').value=c; }); }catch(e){}
+// via: 'web' opens a new message in Outlook on the web; 'app' hands off to the computer's default mail app
+function emailAccounting(via){
+  if(!acctReady()) return;
+  var to=acctAddrs(el('acctEmail').value), cc=acctAddrs(el('acctCc').value);
+  if(!to.list.length || to.bad.length){ el('acctStatus').textContent='Check the To address'+(to.bad.length?': '+to.bad.join(', '):'')+'.'; el('acctStatus').className='save-status err'; return; }
+  if(cc.bad.length){ el('acctStatus').textContent='Check the CC address: '+cc.bad.join(', ')+'.'; el('acctStatus').className='save-status err'; return; }
+  try{ localStorage.setItem('acctEmail2', to.list.join('; ')); localStorage.setItem('acctCc2', cc.list.join('; ')); }catch(e){}
+  var subject='Commission invoice request — '+((currentDealData&&currentDealData.dealname)||'deal');
+  var full=buildAccountingSummary(true);
+  try{ navigator.clipboard.writeText(full); }catch(e){}
+  var toStr=to.list.join(';'), ccStr=cc.list.join(';'), note='';
+  if(via==='web'){
+    var url='https://outlook.office.com/mail/deeplink/compose?to='+encodeURIComponent(toStr)+(ccStr?'&cc='+encodeURIComponent(ccStr):'')+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(full);
+    var w=window.open(url,'_blank');
+    if(!w){ el('acctStatus').textContent='Your browser blocked the new tab — allow pop-ups for this site and try again. The summary is on your clipboard.'; el('acctStatus').className='save-status err'; return; }
+    el('acctStatus').textContent='✓ Opened a new message in Outlook on the web — review it and press send. The summary is also on your clipboard if you need to paste it.'; el('acctStatus').className='save-status ok';
+    return;
+  }
+  // Mail-app links fail silently when they are too long, so trim the body until the whole link is short
+  var head='mailto:'+toStr+'?'+(ccStr?'cc='+ccStr+'&':'')+'subject='+encodeURIComponent(subject)+'&body=';
+  var body=full;
+  if((head+encodeURIComponent(body)).length>1800){ body=buildAccountingSummary(false); note=' The rent schedule was left out to keep the link short — it is on your clipboard, paste it in.'; }
+  if((head+encodeURIComponent(body)).length>1800){
+    body=body.split('\n').filter(function(l){ return !/^\s+(TI allowance|Average rent|Net effective|Landlord net|NPV net)/.test(l) && l!=='Effective rent (per SF per year):'; }).join('\n');
+    note=' The rent schedule and effective rent lines were left out to keep the link short — the full summary is on your clipboard, paste it in.';
+  }
+  window.location.href=head+encodeURIComponent(body);
+  el('acctStatus').textContent='✓ Sent to your mail app. If Outlook did not open, use the Outlook (web) button, or paste the summary (it is on your clipboard) into a new email.'+note; el('acctStatus').className='save-status ok';
+}
+try{ window.addEventListener('DOMContentLoaded', function(){ var v=null, c=null; try{ v=localStorage.getItem('acctEmail2'); c=localStorage.getItem('acctCc2'); }catch(e){} if(v && el('acctEmail')) el('acctEmail').value=v; if(c!==null && el('acctCc')) el('acctCc').value=c; }); }catch(e){}
 
 // ── DOCUMENT UTILITIES ───────────────────────────────────────────────────────
 
@@ -2053,7 +2375,7 @@ function handleAbstractUpload(event){
   el('abstractBtn').disabled=true;
 
   readDocumentFile(file).then(function(doc){
-    abstractDocObject = doc;
+    abstractDocObject = doc; abstractFileName = (typeof file!=='undefined' && file && file.name) ? file.name : abstractFileName; try{ reviewDocLabel(); }catch(e){}
     abstractFileData = doc.data; // keep for backwards compat
     el('abstractFileStatus').innerHTML = '<span class="pill pill-ok">✓ '+file.name+' ('+Math.round(file.size/1024)+'KB) — '+(doc.type==='pdf'?'PDF':'Word doc extracted')+'</span>';
     el('abstractBtn').disabled=false;
